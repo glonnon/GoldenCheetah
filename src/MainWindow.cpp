@@ -515,8 +515,12 @@ MainWindow::MainWindow(const QDir &home) :
     //////////////////////// Ride Map ////////////////////////
     
     map = new GCMapControl();
-	tabWidget->addTab(rideNotes, tr("Ride Map"));
-
+	QHBoxLayout *mapLayout = new QHBoxLayout();
+	mapLayout->addWidget(map);
+	window->setLayout(mapLayout);
+	map->show();
+	tabWidget->addTab(map, tr("Ride Map"));
+	
     ////////////////////////////// Signals ////////////////////////////// 
 
     connect(calendar, SIGNAL(clicked(const QDate &)),

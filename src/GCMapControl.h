@@ -25,15 +25,22 @@ class RideItem;
 
 class GCMapControl : public qmapcontrol::MapControl
 {
+
  private:
 	QList<qmapcontrol::Point*> points;
+	qmapcontrol::MapAdapter *mapAdapter;
+	qmapcontrol::Layer *mapLayer;
+	void addZoomButtons();
+	
+ protected:
+	void resizeEvent(QResizeEvent *ev);
 
  public:
 	GCMapControl();
+	~GCMapControl() { }
 	void setData(RideItem *file);
 	
-	qmapcontrol::MapAdapter *mapadapter;
-	qmapcontrol::Layer *mapLayer;
+	
 
 };
 

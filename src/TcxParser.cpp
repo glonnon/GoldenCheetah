@@ -93,7 +93,7 @@ TcxParser::endElement( const QString&, const QString&, const QString& qName)
 	{
 		latitude = buffer.toDouble();
 	}
-	else if (qName == "LongitudeDegree")
+	else if (qName == "LongitudeDegrees")
 	{
 		longitude = buffer.toDouble();
 	}
@@ -137,7 +137,8 @@ TcxParser::endElement( const QString&, const QString&, const QString& qName)
 
             // Record trackpoint
             rideFile->appendPoint(secs, cadence, hr, distance,
-                                   speed, torque, power, alt, lap);
+								  speed, torque, power, alt, lap, 0.0, 
+								  latitude,longitude);
 
             lastDistance = distance;
         }
