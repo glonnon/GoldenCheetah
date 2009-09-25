@@ -7,7 +7,7 @@ TARGET = GoldenCheetah
 DEPENDPATH += .
 !isEmpty( BOOST_INCLUDE ) { INCLUDEPATH += $${BOOST_INCLUDE} }
 INCLUDEPATH += ../qwt/src ../qmapcontrol/QMapControl
-QT += xml sql
+QT += xml sql network
 LIBS += ../qwt/lib/libqwt.a ../qmapcontrol/QMapControl/libqmapcontrol.a
 LIBS += -lm
 
@@ -87,7 +87,8 @@ HEADERS += \
         XmlRideFile.h \
         ManualRideFile.h \
         ManualRideDialog.h \
-        RideCalendar.h
+        RideCalendar.h \
+        GCMapControl.h \
 
 SOURCES += \
         AllPlot.cpp \
@@ -135,7 +136,8 @@ SOURCES += \
         XmlRideFile.cpp \
         ManualRideFile.cpp \
         ManualRideDialog.cpp \
-        RideCalendar.cpp
+        RideCalendar.cpp \
+        GCMapControl.cpp \
 
 RESOURCES = application.qrc
 

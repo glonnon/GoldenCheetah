@@ -51,6 +51,7 @@
 #include "ToolsDialog.h"
 #include "MetricAggregator.h"
 #include "SplitRideDialog.h"
+#include "GCMapControl.h"
 
 #ifndef GC_VERSION
 #define GC_VERSION "(developer build)"
@@ -511,11 +512,10 @@ MainWindow::MainWindow(const QDir &home) :
     window->show();
     tabWidget->addTab(window, tr("Weekly Summary"));
 
-    //////////////////////// Ride Notes ////////////////////////
+    //////////////////////// Ride Map ////////////////////////
     
-    rideNotes = new QTextEdit;
-    tabWidget->addTab(rideNotes, tr("Notes"));
-
+    map = new GCMapControl();
+	tabWidget->addTab(rideNotes, tr("Ride Map"));
 
     ////////////////////////////// Signals ////////////////////////////// 
 
@@ -942,6 +942,9 @@ MainWindow::rideSelected()
         cpintPlot->calculate(ride);
 	cpintSetCPButton->setEnabled(cpintPlot->cp > 0);
     }
+
+	// set the map data
+	map->setData(ride);
 
     // generate a weekly summary of the week associated with the current ride
     generateWeeklySummary();
