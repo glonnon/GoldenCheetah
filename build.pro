@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = qwt src
+SUBDIRS = qwt qmapcontrol/QMapControl src 

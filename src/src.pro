@@ -6,9 +6,9 @@ TEMPLATE = app
 TARGET = GoldenCheetah
 DEPENDPATH += .
 !isEmpty( BOOST_INCLUDE ) { INCLUDEPATH += $${BOOST_INCLUDE} }
-INCLUDEPATH += ../qwt/src
+INCLUDEPATH += ../qwt/src ../qmapcontrol/QMapControl
 QT += xml sql
-LIBS += ../qwt/lib/libqwt.a
+LIBS += ../qwt/lib/libqwt.a ../qmapcontrol/QMapControl/libqmapcontrol.a
 LIBS += -lm
 
 !isEmpty( D2XX_INCLUDE ) {

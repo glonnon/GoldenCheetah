@@ -89,6 +89,14 @@ TcxParser::endElement( const QString&, const QString&, const QString& qName)
     {
         alt = buffer.toDouble();
     }
+	else if (qName == "LatitudeDegrees")
+	{
+		latitude = buffer.toDouble();
+	}
+	else if (qName == "LongitudeDegree")
+	{
+		longitude = buffer.toDouble();
+	}
     else if (qName == "Trackpoint")
     {
         // nh - there are track points that don't have any distance info.  We need to ignore them

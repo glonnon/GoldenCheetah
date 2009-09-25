@@ -45,8 +45,10 @@ struct RideFilePoint
     double secs, cad, hr, km, kph, nm, watts, alt;
     int interval;
     double bs; // to init in order
+	double latitude, longitude;
     RideFilePoint() : secs(0.0), cad(0.0), hr(0.0), km(0.0), kph(0.0), 
-        nm(0.0), watts(0.0), alt(0.0), interval(0), bs(0.0) {}
+        nm(0.0), watts(0.0), alt(0.0), interval(0), bs(0.0), 
+		latitude(0.0), longitude(0.0){}
     RideFilePoint(double secs, double cad, double hr, double km, double kph, 
                   double nm, double watts, double alt, int interval, double bs) :
         secs(secs), cad(cad), hr(hr), km(km), kph(kph), nm(nm), 

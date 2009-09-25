@@ -511,6 +511,12 @@ MainWindow::MainWindow(const QDir &home) :
     window->show();
     tabWidget->addTab(window, tr("Weekly Summary"));
 
+    //////////////////////// Ride Notes ////////////////////////
+    
+    rideNotes = new QTextEdit;
+    tabWidget->addTab(rideNotes, tr("Notes"));
+
+
     ////////////////////////////// Signals ////////////////////////////// 
 
     connect(calendar, SIGNAL(clicked(const QDate &)),
