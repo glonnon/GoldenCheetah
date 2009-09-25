@@ -26,19 +26,26 @@ using namespace qmapcontrol;
 
 #include <algorithm>
 
-GCMapControl::GCMapControl()  : MapControl(QSize(1024,768))
+GCMapControl::GCMapControl()
 {
+	mapControl = new MapControl(QSize(640,480));
 	mapAdapter = new OSMMapAdapter();
 	mapLayer = new MapLayer("OSM Map", mapAdapter);
-	addLayer(mapLayer);
-	showScale(true);
-	addZoomButtons();
+	mapControl->addLayer(mapLayer);
+
+	mapControl->showScale(true);
+
+	mapControl->enablePersistentCache(); // TODO: need to get the settings and put it in the correct spot...
+	QVBoxLayout *layout = new QVBoxLayout();
+	layout->addWidget(mapControl);
+	layout->addLayout(addZoomButtons());
+	setLayout(layout);
+
 }
 
 void GCMapControl::setData(RideItem *_rideItem)
 {
-	qDebug() << "GCMapControl:" << "setData";
-	
+	mapLayer->clearGeometries();
 	double minLat, minLong, maxLat, maxLong;
 	minLat = minLong = 1000;
 	maxLat = maxLong = -1000; // larger than 360
@@ -54,28 +61,24 @@ void GCMapControl::setData(RideItem *_rideItem)
 		maxLong = std::max(maxLong,rfp->longitude);
 		
 		points.append(new Point(rfp->longitude,rfp->latitude,"what is this"));
-		qDebug() << "max/min: " << minLat << maxLat << minLong << maxLong;
-		qDebug() << "current point " << rfp->latitude << rfp->longitude;
 	}
 	
 	QList<QPointF> view;
 	view.append(QPointF(minLat,minLong));
 	view.append(QPointF(maxLat,maxLong));
-	setViewAndZoomIn(view);
-	setView(points.first());
-	setZoom(13);
-	setMouseMode(MapControl::Panning);
+	mapControl->setViewAndZoomIn(view);
+	mapControl->setView(points.first());
+	mapControl->setZoom(13);
+	mapControl->setMouseMode(MapControl::Panning);
 	
 	QPen *linepen = new QPen(QColor(0,0,255,100));
 	linepen->setWidth(5);
 	LineString *rideString = new LineString(points,"RideString",linepen);
 	mapLayer->addGeometry(rideString);
-	
-	
-
+	mapLayer->setVisible(true);
 }
 
-void GCMapControl::addZoomButtons()
+QLayout *GCMapControl::addZoomButtons()
 {
 	// create buttons as controls for zoom
 	QPushButton* zoomin = new QPushButton("+");
@@ -84,20 +87,32 @@ void GCMapControl::addZoomButtons()
 	zoomout->setMaximumWidth(50);
     
 	connect(zoomin, SIGNAL(clicked(bool)),
-			this, SLOT(zoomIn()));
+			mapControl, SLOT(zoomIn()));
 	connect(zoomout, SIGNAL(clicked(bool)),
-			this, SLOT(zoomOut()));
+			mapControl, SLOT(zoomOut()));
         
-	// add zoom buttons to the layout of the MapControl
-	QVBoxLayout* innerlayout = new QVBoxLayout;
-	innerlayout->addWidget(zoomin);
-	innerlayout->addWidget(zoomout);
-	setLayout(innerlayout);
-	
+	//add zoom buttons to the layout of the MapControl
+	QHBoxLayout* buttonLayout = new QHBoxLayout;
+	buttonLayout->addWidget(zoomin);
+	buttonLayout->addWidget(zoomout);
+
+	return buttonLayout;
 }
 
 void GCMapControl::resizeEvent(QResizeEvent *ev)
 {
-	resize(ev->size());
-	qDebug() << "size changed " << ev->size();
+	mapControl->resize(ev->size());
+	qDebug() << "size changed " << ev->size() << geometry() <<  baseSize() << frameSize() << mapControl->sizeHint();
 }
+
+
+void GCMapControl::mouseMoveEvent(QMouseEvent *event)
+{
+	qDebug() << "mouse moved";
+}
+#if false
+void GCMapControl::wheelEvent(MSG *message, long *result)
+{
+
+}
+#endif

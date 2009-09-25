@@ -20,28 +20,32 @@
 #define _GC_MapControl_h
 
 #include "qmapcontrol.h"
+#include "QWidget"
 
+class QMouseEvent;
 class RideItem;
 
-class GCMapControl : public qmapcontrol::MapControl
+class GCMapControl : public QWidget
 {
 
  private:
 	QList<qmapcontrol::Point*> points;
+	qmapcontrol::MapControl *mapControl;
 	qmapcontrol::MapAdapter *mapAdapter;
 	qmapcontrol::Layer *mapLayer;
-	void addZoomButtons();
+	qmapcontrol::Layer *rideLayer;
+	QLayout *addZoomButtons();
 	
  protected:
 	void resizeEvent(QResizeEvent *ev);
+	void mouseMoveEvent(QMouseEvent *);
+	//	void GCMapControl::wheelEvent(MSG *message, long *result);
 
  public:
 	GCMapControl();
-	~GCMapControl() { }
+	virtual ~GCMapControl() { }
 	void setData(RideItem *file);
 	
-	
-
 };
 
 #endif

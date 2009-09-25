@@ -515,11 +515,8 @@ MainWindow::MainWindow(const QDir &home) :
     //////////////////////// Ride Map ////////////////////////
     
     map = new GCMapControl();
-	QHBoxLayout *mapLayout = new QHBoxLayout();
-	mapLayout->addWidget(map);
-	window->setLayout(mapLayout);
+	tabWidget->insertTab(1,map, tr("Ride Map"));
 	map->show();
-	tabWidget->addTab(map, tr("Ride Map"));
 	
     ////////////////////////////// Signals ////////////////////////////// 
 
