@@ -39,6 +39,7 @@ class RideFile;
 class Zones;
 class RideCalendar;
 class GCMapControl;
+class GoogleMapControl;
 
 class MainWindow : public QMainWindow 
 {
@@ -162,8 +163,9 @@ class MainWindow : public QMainWindow
         QTextEdit *rideNotes;
         QString currentNotesFile;
         bool currentNotesChanged;
-
+		
 		GCMapControl *map;
+		GoogleMapControl *mapGoogle;
 
 	RideItem *ride;  // the currently selected ride
 

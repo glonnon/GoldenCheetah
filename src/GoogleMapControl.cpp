@@ -21,12 +21,19 @@
 
 #include <QDebug>
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 #include <algorithm>
+using namespace std;
+
+#define GOOGLE_KEY "ABQIAAAAS9Z2oFR8vUfLGYSzz40VwRQ69UCJw2HkJgivzGoninIyL8-QPBTtnR-6pM84ljHLEk3PDql0e2nJmg"
 
 GoogleMapControl::GoogleMapControl()
 {
 	view = new QWebView();
-	view->load(QUrl("http://www.trolltech.com"));
+	//	view->load(QUrl("http://www.trolltech.com"));
 	QVBoxLayout *layout = new QVBoxLayout();
 	layout->addWidget(view);
 	setLayout(layout);
@@ -39,8 +46,6 @@ void GoogleMapControl::setData(RideItem *_rideItem)
 	minLat = minLong = 1000;
 	maxLat = maxLong = -1000; // larger than 360
 
-	
-
 	foreach(RideFilePoint* rfp, _rideItem->ride->dataPoints())
 	{
 		minLat = std::min(minLat,rfp->latitude);
@@ -49,7 +54,228 @@ void GoogleMapControl::setData(RideItem *_rideItem)
 		minLong = std::min(minLong,rfp->longitude);
 		maxLong = std::max(maxLong,rfp->longitude);
 		
-		//points.append(new Point(rfp->longitude,rfp->latitude,"what is this"));
 	}
+	ride = _rideItem;
+	int width = this->width();
+	int height = this->height();
+	double startLat = _rideItem->ride->dataPoints().first()->latitude;
+	double startLong = _rideItem->ride->dataPoints().first()->longitude;
+
+	std::ostringstream oss;
+	
+	oss.precision(6);
+	oss.setf(ios::fixed,ios::floatfield);
+
+	oss << "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"" << endl
+		<< "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">" << endl
+		<< "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\">" << endl
+		<< "<head>" << endl
+ 		<< "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>" << endl
+		<< "<title>GoldenCheetah</title>" << endl
+		<< "<script src=\"http://maps.google.com/maps?file=api&amp;v=2&amp;key=" << GOOGLE_KEY <<"\"" << endl
+		<< "type=\"text/javascript\"></script>" << endl
+		<< "<script type=\"text/javascript\">"<< endl
+		<< "var map;" << endl
+		<< "function initialize() {" << endl
+		<< "if (GBrowserIsCompatible()) {" << endl
+		<< "map = new GMap2(document.getElementById(\"map_canvas\"));" << endl
+		<< "map.setCenter(new GLatLng(" << startLat <<"," << startLong << "), 13);" << endl
+		<< "map.addControl(new GLargeMapControl3D());" << endl
+		<< "map.addControl(new GMapTypeControl());" << endl
+		<< "map.addControl(new GScaleControl());" << endl
+		<< CreatePolyLine(ride) << endl
+		<< CreateIntervalMarkers(ride) << endl
+		<< "map.addOverlay(polyline);"<< endl 
+		<< "map.enableScrollWheelZoom();" << endl
+		<< "}" << endl
+		<< "}" << endl
+		<< "function animate() {"  << endl  
+		<< "map.panTo(new GLatLng(" << maxLat << "," << minLong<< "));" << endl
+		<< "}" << endl
+		<< "</script>" << endl
+		<< "</head>" << endl
+		<< "<body onload=\"initialize()\" onunload=\"GUnload()\">" << endl
+		<< "<div id=\"map_canvas\" style=\"width: " << width <<"px; height: "<< height <<"px\"></div>" << endl
+		<< "<form action=\"#\" onsubmit=\"animate(); return false\">" << endl
+		<< "</form>" << endl
+		<< "</body>" << endl
+		<< "</html>" << endl; 
+	
+	
+	QString htmlFile(QDir::tempPath());
+	htmlFile.append("/maps.html");
+	QFile file(htmlFile);
+	file.remove();
+	file.open(QIODevice::ReadWrite);
+	file.write(oss.str().c_str(),oss.str().length());
+	file.flush();
+	file.close();		
+
+	QString filename("file:///");
+	filename.append(htmlFile);
+	
+	QUrl url(filename);
+	view->load(url); 
+	qDebug() << "filename : " << filename << file.fileName() << url.toString();
 }
 
+string GoogleMapControl::CreatePolyLine(RideItem *ride)
+{
+	ostringstream oss;
+	oss << "var polyline = new GPolyline([";
+
+	oss.precision(6);
+	oss.setf(ios::fixed,ios::floatfield);
+	
+	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
+	{
+		oss << "new GLatLng(" << rfp->latitude << "," << rfp->longitude << ")," << endl;
+	}
+	oss << "],\"ff0000\",5);";
+		
+	return oss.str();
+
+}
+
+/// quick ideas on a math pipeline
+
+class RideFilePointAlgorithm
+{
+protected:
+	RideFilePoint prevRfp;
+	bool first;
+	RideFilePointAlgorithm() { first = false; }
+};
+	
+class AltGained : private RideFilePointAlgorithm
+{
+protected:
+	RideFilePoint prevRfp;
+	double gained;
+public:
+	AltGained() { gained = 0; }
+	
+	void operator()(RideFilePoint rfp)
+	{
+		if(rfp.alt > prevRfp.alt)
+		{
+			gained += rfp.alt - prevRfp.alt;
+		}
+		prevRfp = rfp;
+	}
+	double TotalGained() { return gained; }
+};
+
+class AvgHR
+{
+	int samples;
+	double totalHR;
+public:
+	AvgHR() : samples(0),totalHR(0.0) {}
+	void operator()(RideFilePoint rfp)
+	{
+		totalHR += rfp.hr;
+		samples++;
+	}
+	double HR() { return totalHR / samples; }
+};	
+
+class AvgPower
+{
+	int samples;
+	double totalPower;
+public:
+	AvgPower() : samples(0), totalPower(0.0) { }
+	void operator()(RideFilePoint rfp)
+	{
+		totalPower += rfp.watts;
+		samples++;
+	}
+	double Power() { return totalPower / samples; }
+};
+
+string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
+{
+	ostringstream oss;
+	oss.precision(6);
+	oss << "var marker;" << endl;
+	int interval = 5; // 5km
+	int nextInterval = interval;
+	int numInterval = 1;
+	
+	std::vector<RideFilePoint> intervalPoints;
+	
+	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
+	{
+		intervalPoints.push_back(*rfp);
+		if(nextInterval < rfp->km)
+		{
+			// want to see avg power, avg speed, alt changes, avg hr
+			double avgSpeed = (intervalPoints.back().km - intervalPoints.front().km)/
+				(intervalPoints.back().secs - intervalPoints.front().secs);
+			
+			int secs = intervalPoints.back().secs - intervalPoints.front().secs;
+			QTime time(0,0,secs,0);
+			
+			AvgHR avgHr;
+			for_each(intervalPoints.begin(),intervalPoints.end(),avgHr);
+			
+			AvgPower avgPower;
+			for_each(intervalPoints.begin(),intervalPoints.end(),avgPower);
+
+			// alt gained
+			AltGained gained;
+			for_each(intervalPoints.begin(),intervalPoints.end(),gained);
+			
+			oss << "marker = new GMarker(new GLatLng( ";
+			oss<< rfp->latitude << "," << rfp->longitude << "));" << endl;
+#if 1
+			oss << "marker.bindInfoWindowHtml(" <<endl;
+
+			oss << "\"<table>" << endl;
+
+			oss << "<tr>" << endl;
+			oss << "<td>KM Marker</td>" << endl;
+			oss << "<td>"<<numInterval << "</td>" << endl;
+			oss << "</tr>" << endl;
+
+			oss << "<tr>" << endl;
+			oss << "<td>Time</td>" << endl;
+			oss << "<td>"<< time.toString().toStdString() << "</td>" << endl;
+			oss << "</tr>" << endl;
+
+			oss << "<tr>" << endl;
+			oss << "<td>Avg Speed</td>" << endl;
+			oss << "<td>"<< avgSpeed << "</td>" << endl;
+			oss << "</tr>" << endl;
+
+			oss << "<tr>" << endl;
+			if(avgHr.HR() != 0) {
+				oss << "<td>Avg HR</td>" << endl;
+				oss << "<td>"<< numInterval << "</td>" << endl;
+			}
+			oss << "</tr>" << endl;
+
+			oss << "<tr>" << endl;
+			if(avgPower.Power() != 0)
+			{
+				oss << "<td>Avg HR</td>" << endl;
+				oss << "<td>"<< numInterval << "</td>" << endl;
+			}
+			oss << "</tr>" << endl;
+
+			oss << "</table>" << endl;
+			oss << "\");" << endl;
+#endif
+			oss << "map.addOverlay(marker);" << endl;
+			
+			
+			nextInterval+= interval;
+			numInterval++;
+			intervalPoints.clear();
+		}
+	}
+	return oss.str();
+}
+
+		

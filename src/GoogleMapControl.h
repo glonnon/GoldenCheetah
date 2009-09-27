@@ -21,6 +21,7 @@
 
 #include <QWidget>
 #include <QtWebKit>
+#include <string>
 
 class QMouseEvent;
 class RideItem;
@@ -30,7 +31,9 @@ class GoogleMapControl : public QWidget
 
  private:
 	QWebView *view;
-	
+	RideItem *ride;
+	std::string CreatePolyLine(RideItem *);
+	std::string CreateIntervalMarkers(RideItem *);
  protected:
 
  public:
