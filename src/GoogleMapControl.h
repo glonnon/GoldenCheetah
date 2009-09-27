@@ -34,13 +34,15 @@ class GoogleMapControl : public QWidget
 	RideItem *ride;
 	std::string CreatePolyLine(RideItem *);
 	std::string CreateIntervalMarkers(RideItem *);
+
  protected:
+	void resizeEvent(QResizeEvent *ev);
+	void createHtml();
 
  public:
 	GoogleMapControl();
 	virtual ~GoogleMapControl() { }
 	void setData(RideItem *file);
-	
 };
 
 #endif

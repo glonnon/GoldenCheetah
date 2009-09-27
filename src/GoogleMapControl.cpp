@@ -39,14 +39,26 @@ GoogleMapControl::GoogleMapControl()
 	setLayout(layout);
 }
 
+void GoogleMapControl::resizeEvent(QResizeEvent *ev)
+{
+	createHtml();
+	QWidget::resizeEvent(ev);
+}
+
 void GoogleMapControl::setData(RideItem *_rideItem)
 {
-	
+	ride = _rideItem;
+}
+
+void GoogleMapControl::createHtml()
+{
+	if(ride == NULL) return;
+
 	double minLat, minLong, maxLat, maxLong;
 	minLat = minLong = 1000;
 	maxLat = maxLong = -1000; // larger than 360
 
-	foreach(RideFilePoint* rfp, _rideItem->ride->dataPoints())
+	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
 	{
 		minLat = std::min(minLat,rfp->latitude);
 		maxLat = std::max(maxLat,rfp->latitude);
@@ -55,11 +67,13 @@ void GoogleMapControl::setData(RideItem *_rideItem)
 		maxLong = std::max(maxLong,rfp->longitude);
 		
 	}
-	ride = _rideItem;
+
 	int width = this->width();
 	int height = this->height();
-	double startLat = _rideItem->ride->dataPoints().first()->latitude;
-	double startLong = _rideItem->ride->dataPoints().first()->longitude;
+	qDebug() << "w h " << width << height << view->width() << view->height() <<endl;
+
+	double startLat = ride->ride->dataPoints().first()->latitude;
+	double startLong = ride->ride->dataPoints().first()->longitude;
 
 	std::ostringstream oss;
 	
@@ -117,6 +131,7 @@ void GoogleMapControl::setData(RideItem *_rideItem)
 	QUrl url(filename);
 	view->load(url); 
 	qDebug() << "filename : " << filename << file.fileName() << url.toString();
+
 }
 
 string GoogleMapControl::CreatePolyLine(RideItem *ride)
@@ -130,8 +145,7 @@ string GoogleMapControl::CreatePolyLine(RideItem *ride)
 	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
 	{
 		oss << "new GLatLng(" << rfp->latitude << "," << rfp->longitude << ")," << endl;
-	}
-	oss << "],\"ff0000\",5);";
+	}	oss << "],\"ff0000\",5);";
 		
 	return oss.str();
 
@@ -229,7 +243,7 @@ string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 			
 			oss << "marker = new GMarker(new GLatLng( ";
 			oss<< rfp->latitude << "," << rfp->longitude << "));" << endl;
-#if 1
+#if 0
 			oss << "marker.bindInfoWindowHtml(" <<endl;
 
 			oss << "\"<table>" << endl;
