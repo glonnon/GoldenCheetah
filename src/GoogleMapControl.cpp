@@ -70,7 +70,6 @@ void GoogleMapControl::createHtml()
 
 	int width = this->width();
 	int height = this->height();
-	qDebug() << "w h " << width << height << view->width() << view->height() <<endl;
 
 	double startLat = ride->ride->dataPoints().first()->latitude;
 	double startLong = ride->ride->dataPoints().first()->longitude;
@@ -130,8 +129,6 @@ void GoogleMapControl::createHtml()
 	
 	QUrl url(filename);
 	view->load(url); 
-	qDebug() << "filename : " << filename << file.fileName() << url.toString();
-
 }
 
 string GoogleMapControl::CreatePolyLine(RideItem *ride)
@@ -151,7 +148,9 @@ string GoogleMapControl::CreatePolyLine(RideItem *ride)
 
 }
 
-/// quick ideas on a math pipeline
+// quick ideas on a math pipeline, kindof like this...
+// but more of a pipeline...
+// it makes the math somewhat easier to do and understand...
 
 class RideFilePointAlgorithm
 {
@@ -177,13 +176,14 @@ public:
 		}
 		prevRfp = rfp;
 	}
-	double TotalGained() { return gained; }
+	int TotalGained() { return gained; }
+	operator int() { return TotalGained(); }
 };
 
 class AvgHR
 {
 	int samples;
-	double totalHR;
+	int totalHR;
 public:
 	AvgHR() : samples(0),totalHR(0.0) {}
 	void operator()(RideFilePoint rfp)
@@ -191,7 +191,8 @@ public:
 		totalHR += rfp.hr;
 		samples++;
 	}
-	double HR() { return totalHR / samples; }
+	int HR() { return totalHR / samples; }
+	operator int() { return HR(); }
 };	
 
 class AvgPower
@@ -205,87 +206,67 @@ public:
 		totalPower += rfp.watts;
 		samples++;
 	}
-	double Power() { return totalPower / samples; }
+	int Power() { return (int) (totalPower / samples); }
+	operator int() { return Power(); }
 };
 
 string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 {
 	ostringstream oss;
 	oss.precision(6);
+	oss.setf(ios::fixed,ios::floatfield);
+
 	oss << "var marker;" << endl;
-	int interval = 5; // 5km
-	int nextInterval = interval;
-	int numInterval = 1;
+	int currentInterval = 0;
 	
 	std::vector<RideFilePoint> intervalPoints;
 	
 	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
 	{
 		intervalPoints.push_back(*rfp);
-		if(nextInterval < rfp->km)
+		if(currentInterval < rfp->interval)
 		{
 			// want to see avg power, avg speed, alt changes, avg hr
-			double avgSpeed = (intervalPoints.back().km - intervalPoints.front().km)/
-				(intervalPoints.back().secs - intervalPoints.front().secs);
-			
-			int secs = intervalPoints.back().secs - intervalPoints.front().secs;
-			QTime time(0,0,secs,0);
-			
-			AvgHR avgHr;
-			for_each(intervalPoints.begin(),intervalPoints.end(),avgHr);
-			
-			AvgPower avgPower;
-			for_each(intervalPoints.begin(),intervalPoints.end(),avgPower);
+			double distance = intervalPoints.back().km -
+							   intervalPoints.front().km ;
+			int secs = intervalPoints.back().secs -
+				intervalPoints.front().secs;
 
-			// alt gained
-			AltGained gained;
-			for_each(intervalPoints.begin(),intervalPoints.end(),gained);
+			double avgSpeed = (distance/((double)secs)) * 3600;
+			QTime time;
+			time = time.addSecs(secs);
+
+			AvgHR avgHr = for_each(intervalPoints.begin(),
+								   intervalPoints.end(),
+								   AvgHR());
+			
+			AvgPower avgPower = for_each(intervalPoints.begin(),
+										 intervalPoints.end(),
+										 AvgPower());
+
+			AltGained altGained =for_each(intervalPoints.begin(),
+									   intervalPoints.end(),
+									   AltGained());
 			
 			oss << "marker = new GMarker(new GLatLng( ";
 			oss<< rfp->latitude << "," << rfp->longitude << "));" << endl;
-#if 0
 			oss << "marker.bindInfoWindowHtml(" <<endl;
-
-			oss << "\"<table>" << endl;
-
-			oss << "<tr>" << endl;
-			oss << "<td>KM Marker</td>" << endl;
-			oss << "<td>"<<numInterval << "</td>" << endl;
-			oss << "</tr>" << endl;
-
-			oss << "<tr>" << endl;
-			oss << "<td>Time</td>" << endl;
-			oss << "<td>"<< time.toString().toStdString() << "</td>" << endl;
-			oss << "</tr>" << endl;
-
-			oss << "<tr>" << endl;
-			oss << "<td>Avg Speed</td>" << endl;
-			oss << "<td>"<< avgSpeed << "</td>" << endl;
-			oss << "</tr>" << endl;
-
-			oss << "<tr>" << endl;
-			if(avgHr.HR() != 0) {
-				oss << "<td>Avg HR</td>" << endl;
-				oss << "<td>"<< numInterval << "</td>" << endl;
+			oss << "\"<p><h3>Lap: " << currentInterval << "</h3></p>" ;
+			oss << "<p>Distance: " << distance << "</p>" ;
+			oss << "<p>Time: " << time.toString().toStdString() << "</p>";
+			oss << "<p>Avg Speed</>: " << avgSpeed << "</p>";
+			if(avgHr != 0) {
+				oss << "<p>Avg HR: " << avgHr << "</p>";
 			}
-			oss << "</tr>" << endl;
-
-			oss << "<tr>" << endl;
-			if(avgPower.Power() != 0)
+			if(avgPower != 0)
 			{
-				oss << "<td>Avg HR</td>" << endl;
-				oss << "<td>"<< numInterval << "</td>" << endl;
+				oss << "<p>Avg Power: " << avgPower << "</p>";
 			}
-			oss << "</tr>" << endl;
-
-			oss << "</table>" << endl;
+			oss << "<p>Alt Gained: " << altGained << "</p>";
 			oss << "\");" << endl;
-#endif
 			oss << "map.addOverlay(marker);" << endl;
 			
-			
-			nextInterval+= interval;
-			numInterval++;
+			currentInterval = rfp->interval;
 			intervalPoints.clear();
 		}
 	}
