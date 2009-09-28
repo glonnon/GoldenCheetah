@@ -18,6 +18,7 @@
 #include "GoogleMapControl.h"
 #include "RideItem.h"
 #include "RideFile.h"
+#include "Settings.h"
 
 #include <QDebug>
 
@@ -129,6 +130,7 @@ void GoogleMapControl::createHtml()
 	filename.append(htmlFile);
 	
 	QUrl url(filename);
+	// need to do it this way, for google masp terms
 	view->load(url); 
 }
 
@@ -211,6 +213,66 @@ public:
 	operator int() { return Power(); }
 };
 
+// TODO: make a generic converting class
+#define MILES_PER_KM 0.62137119
+#define  KM_PER_MILES (1/MILES_PER_KM)
+#define  FEET
+
+void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVector &interval,
+									const RideFilePoint &rfp)
+{
+	boost::shared_ptr<QSettings> settings;
+	bool isMetric = true;
+	settings = GetApplicationSettings();
+	QVariant unit = settings->value(GC_UNIT);
+    if(unit.toString() != "Metric")
+        isMetric = false;
+
+
+	// want to see avg power, avg speed, alt changes, avg hr
+	double distance = interval.back().km -
+		interval.front().km ;
+
+	if(!isMetric) distance *= KM_PER_MILES;
+
+	int secs = interval.back().secs -
+		interval.front().secs;
+
+	double avgSpeed = (distance/((double)secs)) * 3600;
+	QTime time;
+	time = time.addSecs(secs);
+
+	AvgHR avgHr = for_each(interval.begin(),
+						   interval.end(),
+						   AvgHR());
+
+	AvgPower avgPower = for_each(interval.begin(),
+								 interval.end(),
+										 AvgPower());
+
+	AltGained altGained =for_each(interval.begin(),
+								  interval.end(),
+								  AltGained());
+
+	oss << "marker = new GMarker(new GLatLng( ";
+	oss<< rfp.latitude << "," << rfp.longitude << "));" << endl;
+	oss << "marker.bindInfoWindowHtml(" <<endl;
+	oss << "\"<p><h3>Lap: " << rfp.interval << "</h3></p>" ;
+	oss << "<p>Distance: " << distance << "</p>" ;
+	oss << "<p>Time: " << time.toString().toStdString() << "</p>";
+	oss << "<p>Avg Speed</>: " << avgSpeed << "</p>";
+	if(avgHr != 0) {
+		oss << "<p>Avg HR: " << avgHr << "</p>";
+	}
+	if(avgPower != 0)
+	{
+				oss << "<p>Avg Power: " << avgPower << "</p>";
+	}
+	oss << "<p>Alt Gained: " << altGained << "</p>";
+	oss << "\");" << endl;
+	oss << "map.addOverlay(marker);" << endl;
+}
+
 string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 {
 	ostringstream oss;
@@ -220,57 +282,23 @@ string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 	oss << "var marker;" << endl;
 	int currentInterval = 0;
 	
-	std::vector<RideFilePoint> intervalPoints;
-	
+	RideFilePointVector intervalPoints;
+	RideFilePointVector totalRide;
+
 	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
 	{
+		totalRide.push_back(*rfp);
 		intervalPoints.push_back(*rfp);
 		if(currentInterval < rfp->interval)
 		{
-			// want to see avg power, avg speed, alt changes, avg hr
-			double distance = intervalPoints.back().km -
-							   intervalPoints.front().km ;
-			int secs = intervalPoints.back().secs -
-				intervalPoints.front().secs;
-
-			double avgSpeed = (distance/((double)secs)) * 3600;
-			QTime time;
-			time = time.addSecs(secs);
-
-			AvgHR avgHr = for_each(intervalPoints.begin(),
-								   intervalPoints.end(),
-								   AvgHR());
-			
-			AvgPower avgPower = for_each(intervalPoints.begin(),
-										 intervalPoints.end(),
-										 AvgPower());
-
-			AltGained altGained =for_each(intervalPoints.begin(),
-									   intervalPoints.end(),
-									   AltGained());
-			
-			oss << "marker = new GMarker(new GLatLng( ";
-			oss<< rfp->latitude << "," << rfp->longitude << "));" << endl;
-			oss << "marker.bindInfoWindowHtml(" <<endl;
-			oss << "\"<p><h3>Lap: " << currentInterval << "</h3></p>" ;
-			oss << "<p>Distance: " << distance << "</p>" ;
-			oss << "<p>Time: " << time.toString().toStdString() << "</p>";
-			oss << "<p>Avg Speed</>: " << avgSpeed << "</p>";
-			if(avgHr != 0) {
-				oss << "<p>Avg HR: " << avgHr << "</p>";
-			}
-			if(avgPower != 0)
-			{
-				oss << "<p>Avg Power: " << avgPower << "</p>";
-			}
-			oss << "<p>Alt Gained: " << altGained << "</p>";
-			oss << "\");" << endl;
-			oss << "map.addOverlay(marker);" << endl;
-			
+			CreateMarker(oss,intervalPoints,*rfp);
 			currentInterval = rfp->interval;
 			intervalPoints.clear();
 		}
 	}
+	// total ride information
+	CreateMarker(oss,totalRide,intervalPoints.back());
+
 	return oss.str();
 }
 

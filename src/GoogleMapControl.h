@@ -21,20 +21,29 @@
 
 #include <QWidget>
 #include <QtWebKit>
+
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <vector>
 
 class QMouseEvent;
 class RideItem;
+class RideFilePoint;
 
 class GoogleMapControl : public QWidget
 {
 
  private:
+	typedef std::vector<RideFilePoint> RideFilePointVector;
+
 	QWebView *view;
 	RideItem *ride;
 	std::string CreatePolyLine(RideItem *);
 	std::string CreateIntervalMarkers(RideItem *);
-
+	void CreateMarker(std::ostringstream &oss,
+					  const RideFilePointVector &interval,
+					  const RideFilePoint &rfp);
  protected:
 	void resizeEvent(QResizeEvent *ev);
 	void createHtml();
