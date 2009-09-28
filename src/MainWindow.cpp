@@ -510,7 +510,6 @@ MainWindow::MainWindow(const QDir &home) :
     
     map = new GCMapControl();
 	tabWidget->insertTab(1,map, tr("Ride Map"));
-	map->show();
 	
 	//////////////////////// Ride Map ////////////////////////
 	

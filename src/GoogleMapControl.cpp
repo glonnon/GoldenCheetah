@@ -48,6 +48,7 @@ void GoogleMapControl::resizeEvent(QResizeEvent *ev)
 void GoogleMapControl::setData(RideItem *_rideItem)
 {
 	ride = _rideItem;
+	createHtml();
 }
 
 void GoogleMapControl::createHtml()
