@@ -155,29 +155,24 @@ string GoogleMapControl::CreatePolyLine(RideItem *ride)
 // but more of a pipeline...
 // it makes the math somewhat easier to do and understand...
 
-class RideFilePointAlgorithm
-{
-protected:
-	RideFilePoint prevRfp;
-	bool first;
-	RideFilePointAlgorithm() { first = false; }
-};
-	
-class AltGained : private RideFilePointAlgorithm
+#include <limits>
+
+class AltGained
 {
 protected:
 	double peak;
 	double valley;
 public:
-	AltGained() { peak  = -50000; valley = 50000; }
+	AltGained() :
+		peak(std::numeric_limits<double>::min()),
+		valley(std::numeric_limits<double>::max()) {}
 	
 	void operator()(RideFilePoint rfp)
 	{
 		peak = max(peak,rfp.alt);
 		valley = min(valley,rfp.alt);
 	}
-	int TotalGained() { return peak-valley; }
-	operator int() { return TotalGained(); }
+	operator int() { return peak - valley; }
 };
 
 class AvgHR
@@ -185,14 +180,13 @@ class AvgHR
 	int samples;
 	int totalHR;
 public:
-	AvgHR() : samples(0),totalHR(0.0) {}
+	AvgHR() : samples(0), totalHR(0) {}
 	void operator()(RideFilePoint rfp)
 	{
 		totalHR += rfp.hr;
 		samples++;
 	}
-	int HR() { return totalHR / samples; }
-	operator int() { return HR(); }
+	operator int() { return totalHR / samples; }
 };	
 
 class AvgPower
@@ -206,14 +200,14 @@ public:
 		totalPower += rfp.watts;
 		samples++;
 	}
-	int Power() { return (int) (totalPower / samples); }
-	operator int() { return Power(); }
+	operator int() { return totalPower/samples; }
 };
 
 // TODO: make a generic converting class
 #define MILES_PER_KM 0.62137119
 #define  KM_PER_MILES (1/MILES_PER_KM)
-#define  FEET
+#define  FEET_PER_METER 3.2808399
+#define  METER_PER_FEET (1/FEET_PER_METER)
 
 void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVector &interval,
 									const RideFilePoint &rfp)
@@ -265,7 +259,7 @@ void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVecto
 	{
 				oss << "<p>Avg Power: " << avgPower << "</p>";
 	}
-	oss << "<p>Alt Gained: " << altGained << "</p>";
+	oss << "<p>Alt Gained: " << (int)round((isMetric ? altGained : altGained * FEET_PER_METER)) << "</p>";
 	oss << "\");" << endl;
 	oss << "map.addOverlay(marker);" << endl;
 }
