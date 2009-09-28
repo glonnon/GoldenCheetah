@@ -51,6 +51,8 @@
 #include "ToolsDialog.h"
 #include "MetricAggregator.h"
 #include "SplitRideDialog.h"
+#include "GCMapControl.h"
+#include "GoogleMapControl.h"
 
 #ifndef GC_VERSION
 #define GC_VERSION "(developer build)"
@@ -504,6 +506,17 @@ MainWindow::MainWindow(const QDir &home) :
     window->setLayout(glayout);
     tabWidget->addTab(window, tr("Weekly Summary"));
 
+    //////////////////////// Ride Map ////////////////////////
+    
+    map = new GCMapControl();
+	tabWidget->insertTab(1,map, tr("Ride Map"));
+	map->show();
+	
+	//////////////////////// Ride Map ////////////////////////
+	
+	mapGoogle = new GoogleMapControl();
+	tabWidget->insertTab(1,mapGoogle, tr("Google Map"));
+	
     ////////////////////////////// Signals ////////////////////////////// 
 
     connect(calendar, SIGNAL(clicked(const QDate &)),
@@ -929,6 +942,10 @@ MainWindow::rideSelected()
         cpintPlot->calculate(ride);
 	cpintSetCPButton->setEnabled(cpintPlot->cp > 0);
     }
+
+	// set the map data
+	map->setData(ride);
+	mapGoogle->setData(ride);
 
     // generate a weekly summary of the week associated with the current ride
     generateWeeklySummary();

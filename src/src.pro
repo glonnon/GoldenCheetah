@@ -6,9 +6,9 @@ TEMPLATE = app
 TARGET = GoldenCheetah
 DEPENDPATH += .
 !isEmpty( BOOST_INCLUDE ) { INCLUDEPATH += $${BOOST_INCLUDE} }
-INCLUDEPATH += ../qwt/src
-QT += xml sql
-LIBS += ../qwt/lib/libqwt.a
+INCLUDEPATH += ../qwt/src ../qmapcontrol/QMapControl
+QT += xml sql network webkit
+LIBS += ../qwt/lib/libqwt.a ../qmapcontrol/QMapControl/libqmapcontrol.a
 LIBS += -lm
 
 !isEmpty( D2XX_INCLUDE ) {
@@ -87,7 +87,9 @@ HEADERS += \
         XmlRideFile.h \
         ManualRideFile.h \
         ManualRideDialog.h \
-        RideCalendar.h
+        RideCalendar.h \
+        GCMapControl.h \
+        GoogleMapControl.h \
 
 SOURCES += \
         AllPlot.cpp \
@@ -135,7 +137,9 @@ SOURCES += \
         XmlRideFile.cpp \
         ManualRideFile.cpp \
         ManualRideDialog.cpp \
-        RideCalendar.cpp
+        RideCalendar.cpp \
+        GCMapControl.cpp \
+        GoogleMapControl.cpp \
 
 RESOURCES = application.qrc
 

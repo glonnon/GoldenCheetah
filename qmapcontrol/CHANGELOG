@@ -1,0 +1,41 @@
+0.9.5.2 (2009-07-29)
+=====
+- The new EmptyMapAdapter allows it to just display and navigate through an defined image and not to load map tiles. See new sample application.
+
+2009-04-19
+----------
+- new class FixedImageOverlay for drawing an image overlay onto a map, whose upper left and lower 
+  right corners lay always on the given coordinates. Inheritance is not perfect here: 
+  the methods setBaselevel, setMaxsize and setMinsize have no effect for this class.
+
+2009-02-28
+-----------
+- Fixed bug which didn't painted the zoomed image correct after the QMapControl widget was resized 
+
+2008-10-28
+----------
+- New MapControl slot: resize(QSize) which resizes layers to the given size. So you can connect a widget's resize event to this slot. (See sample "Mapviewer").
+
+2008-10-09
+----------
+- New MapControl-signal: viewChanged(coordinate, zoom) which emits the current center coordinate and zoom level after an view update (Thanks to Lorenzo)
+
+2008-09-28
+----------
+- New layer-method clearGeometries() to remove all Geometry objects of a layer
+
+0.9.5.1
+=======
+- Minor changes: limiting zoom not to exceed min and max borders
+- showScale caused crash if zoom was out of range
+
+0.9.5
+=====
+- new method "enablePersistentCache()" allows to store map tiles
+- new method "showScale(bool)" allows to display the scale of the current map
+
+0.9.4
+=====
+- removed "get" prefixes from ancessor functions, to improve Qt-like design
+- renamed event "geometryClickEvent()" to "geometryClicked()"
+- renamed event "draggedRect()" to "boxDragged()"

@@ -45,12 +45,17 @@ struct RideFilePoint
     double secs, cad, hr, km, kph, nm, watts, alt;
     int interval;
     double bs; // to init in order
+	double latitude, longitude;
     RideFilePoint() : secs(0.0), cad(0.0), hr(0.0), km(0.0), kph(0.0), 
-        nm(0.0), watts(0.0), alt(0.0), interval(0), bs(0.0) {}
+        nm(0.0), watts(0.0), alt(0.0), interval(0), bs(0.0), 
+		latitude(0.0), longitude(0.0){}
     RideFilePoint(double secs, double cad, double hr, double km, double kph, 
-                  double nm, double watts, double alt, int interval, double bs) :
-        secs(secs), cad(cad), hr(hr), km(km), kph(kph), nm(nm), 
-        watts(watts), alt(alt), interval(interval), bs(bs) {}
+                  double nm, double watts, double alt, int interval, double bs,
+				  double lat = 0, double lng = 0) :
+	    secs(secs), cad(cad), hr(hr), km(km), kph(kph), nm(nm), 
+		watts(watts), alt(alt), interval(interval), bs(bs),
+		latitude(lat),longitude(lng)	
+	{}
 };
 
 struct RideFileDataPresent
@@ -96,7 +101,7 @@ class RideFile
         void setDeviceType(const QString &value) { deviceType_ = value; }
         
         void appendPoint(double secs, double cad, double hr, double km, 
-                double kph, double nm, double watts, double alt, int interval, double bs=0.0);
+						 double kph, double nm, double watts, double alt, int interval, double bs=0.0,double lat = 0.0, double lng = 0.0);
 
         bool writeAsXml(QFile &file, QString &err) const;
         void writeAsCsv(QFile &file, bool bIsMetric) const;

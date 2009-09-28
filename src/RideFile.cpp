@@ -203,10 +203,10 @@ QStringList RideFileFactory::listRideFiles(const QDir &dir) const
 
 void RideFile::appendPoint(double secs, double cad, double hr, double km, 
 		           double kph, double nm, double watts, double alt, 
-                           int interval, double bs)
+                           int interval, double bs, double lat, double lng)
 {
     dataPoints_.append(new RideFilePoint(secs, cad, hr, km, kph, 
-		nm, watts, alt, interval,bs));
+										 nm, watts, alt, interval,bs,lat,lng));
     dataPresent.secs  |= (secs != 0);
     dataPresent.cad   |= (cad != 0);
     dataPresent.hr    |= (hr != 0);
