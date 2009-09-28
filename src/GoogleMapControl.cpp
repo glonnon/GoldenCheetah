@@ -166,20 +166,17 @@ protected:
 class AltGained : private RideFilePointAlgorithm
 {
 protected:
-	RideFilePoint prevRfp;
-	double gained;
+	double peak;
+	double valley;
 public:
-	AltGained() { gained = 0; }
+	AltGained() { peak  = -50000; valley = 50000; }
 	
 	void operator()(RideFilePoint rfp)
 	{
-		if(rfp.alt > prevRfp.alt)
-		{
-			gained += rfp.alt - prevRfp.alt;
-		}
-		prevRfp = rfp;
+		peak = max(peak,rfp.alt);
+		valley = min(valley,rfp.alt);
 	}
-	int TotalGained() { return gained; }
+	int TotalGained() { return peak-valley; }
 	operator int() { return TotalGained(); }
 };
 
