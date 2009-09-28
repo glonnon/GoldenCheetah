@@ -230,7 +230,7 @@ void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVecto
 	double distance = interval.back().km -
 		interval.front().km ;
 
-	if(!isMetric) distance *= KM_PER_MILES;
+	if(!isMetric) distance *= MILES_PER_KM;
 
 	int secs = interval.back().secs -
 		interval.front().secs;
