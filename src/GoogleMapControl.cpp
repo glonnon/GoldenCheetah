@@ -1,16 +1,16 @@
-/* 
+/*
  * Copyright (c) 2009 Greg Lonnon (greg.lonnon@gmail.com)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
  * any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -64,10 +64,10 @@ void GoogleMapControl::createHtml()
 	{
 		minLat = std::min(minLat,rfp->latitude);
 		maxLat = std::max(maxLat,rfp->latitude);
-		
+
 		minLong = std::min(minLong,rfp->longitude);
 		maxLong = std::max(maxLong,rfp->longitude);
-		
+
 	}
 
 	int width = this->width();
@@ -77,7 +77,7 @@ void GoogleMapControl::createHtml()
 	double startLong = ride->ride->dataPoints().first()->longitude;
 
 	std::ostringstream oss;
-	
+
 	oss.precision(6);
 	oss.setf(ios::fixed,ios::floatfield);
 
@@ -100,11 +100,11 @@ void GoogleMapControl::createHtml()
 		<< "map.addControl(new GScaleControl());" << endl
 		<< CreatePolyLine(ride) << endl
 		<< CreateIntervalMarkers(ride) << endl
-		<< "map.addOverlay(polyline);"<< endl 
+		<< "map.addOverlay(polyline);"<< endl
 		<< "map.enableScrollWheelZoom();" << endl
 		<< "}" << endl
 		<< "}" << endl
-		<< "function animate() {"  << endl  
+		<< "function animate() {"  << endl
 		<< "map.panTo(new GLatLng(" << maxLat << "," << minLong<< "));" << endl
 		<< "}" << endl
 		<< "</script>" << endl
@@ -114,9 +114,9 @@ void GoogleMapControl::createHtml()
 		<< "<form action=\"#\" onsubmit=\"animate(); return false\">" << endl
 		<< "</form>" << endl
 		<< "</body>" << endl
-		<< "</html>" << endl; 
-	
-	
+		<< "</html>" << endl;
+
+
 	QString htmlFile(QDir::tempPath());
 	htmlFile.append("/maps.html");
 	QFile file(htmlFile);
@@ -124,14 +124,14 @@ void GoogleMapControl::createHtml()
 	file.open(QIODevice::ReadWrite);
 	file.write(oss.str().c_str(),oss.str().length());
 	file.flush();
-	file.close();		
+	file.close();
 
 	QString filename("file:///");
 	filename.append(htmlFile);
-	
+
 	QUrl url(filename);
 	// need to do it this way, for google masp terms
-	view->load(url); 
+	view->load(url);
 }
 
 string GoogleMapControl::CreatePolyLine(RideItem *ride)
@@ -141,20 +141,21 @@ string GoogleMapControl::CreatePolyLine(RideItem *ride)
 
 	oss.precision(6);
 	oss.setf(ios::fixed,ios::floatfield);
-	
+
 	foreach(RideFilePoint* rfp, ride->ride->dataPoints())
 	{
 		oss << "new GLatLng(" << rfp->latitude << "," << rfp->longitude << ")," << endl;
 	}	oss << "],\"ff0000\",5);";
-		
+
 	return oss.str();
 
 }
 
+
+
 // quick ideas on a math pipeline, kindof like this...
 // but more of a pipeline...
 // it makes the math somewhat easier to do and understand...
-
 #include <limits>
 
 class AltGained
@@ -166,7 +167,7 @@ public:
 	AltGained() :
 		peak(std::numeric_limits<double>::min()),
 		valley(std::numeric_limits<double>::max()) {}
-	
+
 	void operator()(RideFilePoint rfp)
 	{
 		peak = max(peak,rfp.alt);
@@ -175,32 +176,37 @@ public:
 	operator int() { return peak - valley; }
 };
 
-class AvgHR
+template<typename Type, typename SampleType>
+class Accumulator
 {
-	int samples;
-	int totalHR;
+protected:
+	int numSamples;
+	Type total;
+	Accumulator() : numSamples(0) {}
+	virtual Type getSampleValue(const SampleType &) = 0;
 public:
-	AvgHR() : samples(0), totalHR(0) {}
-	void operator()(RideFilePoint rfp)
+	void operator()(SampleType sample)
 	{
-		totalHR += rfp.hr;
-		samples++;
+		total += getSampleValue(sample);
+		numSamples++;
 	}
-	operator int() { return totalHR / samples; }
-};	
+	operator Type() { return (total/numSamples); }
+};
 
-class AvgPower
+class AvgHR : public Accumulator<int,RideFilePoint>
 {
-	int samples;
-	double totalPower;
+protected:
+	virtual int getSampleValue(const RideFilePoint &rfp) { return rfp.hr; }
 public:
-	AvgPower() : samples(0), totalPower(0.0) { }
-	void operator()(RideFilePoint rfp)
-	{
-		totalPower += rfp.watts;
-		samples++;
-	}
-	operator int() { return totalPower/samples; }
+	AvgHR()  { total = 0; }
+};
+
+class AvgWatts : public Accumulator<int,RideFilePoint>
+{
+protected:
+	virtual int getSampleValue(const RideFilePoint &rfp) { return rfp.watts; }
+public:
+	AvgWatts() { total = 0; }
 };
 
 // TODO: make a generic converting class
@@ -219,7 +225,6 @@ void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVecto
     if(unit.toString() != "Metric")
         isMetric = false;
 
-
 	// want to see avg power, avg speed, alt changes, avg hr
 	double distance = interval.back().km -
 		interval.front().km ;
@@ -237,29 +242,36 @@ void GoogleMapControl::CreateMarker(ostringstream &oss, const RideFilePointVecto
 						   interval.end(),
 						   AvgHR());
 
-	AvgPower avgPower = for_each(interval.begin(),
+	AvgWatts avgPower = for_each(interval.begin(),
 								 interval.end(),
-										 AvgPower());
+								 AvgWatts());
 
 	AltGained altGained =for_each(interval.begin(),
 								  interval.end(),
 								  AltGained());
-
+	oss.precision(6);
 	oss << "marker = new GMarker(new GLatLng( ";
 	oss<< rfp.latitude << "," << rfp.longitude << "));" << endl;
 	oss << "marker.bindInfoWindowHtml(" <<endl;
-	oss << "\"<p><h3>Lap: " << rfp.interval << "</h3></p>" ;
+	oss << "\"<p><h3>Interval: " << rfp.interval << "</h3></p>" ;
+	oss.precision(2);
 	oss << "<p>Distance: " << distance << "</p>" ;
 	oss << "<p>Time: " << time.toString().toStdString() << "</p>";
 	oss << "<p>Avg Speed</>: " << avgSpeed << "</p>";
 	if(avgHr != 0) {
 		oss << "<p>Avg HR: " << avgHr << "</p>";
 	}
+
 	if(avgPower != 0)
 	{
-				oss << "<p>Avg Power: " << avgPower << "</p>";
+		oss << "<p>Avg Power: " << avgPower << "</p>";
 	}
-	oss << "<p>Alt Gained: " << (int)round((isMetric ? altGained : altGained * FEET_PER_METER)) << "</p>";
+
+	oss << "<p>Alt Gained: "
+		<< (int)round((isMetric ?
+					   altGained :
+					   altGained * FEET_PER_METER))
+		<< "</p>";
 	oss << "\");" << endl;
 	oss << "map.addOverlay(marker);" << endl;
 }
@@ -272,7 +284,7 @@ string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 
 	oss << "var marker;" << endl;
 	int currentInterval = 0;
-	
+
 	RideFilePointVector intervalPoints;
 	RideFilePointVector totalRide;
 
@@ -292,5 +304,3 @@ string GoogleMapControl::CreateIntervalMarkers(RideItem *ride)
 
 	return oss.str();
 }
-
-		
