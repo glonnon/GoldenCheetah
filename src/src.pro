@@ -74,6 +74,7 @@ HEADERS += \
         ErgFile.h \
         ErgFilePlot.h \
         FitRideFile.h \
+        GcJsonRideFile.h \
         GcRideFile.h \
         GoogleMapControl.h \
         HistogramWindow.h \
@@ -167,6 +168,7 @@ SOURCES += \
         ErgFile.cpp \
         ErgFilePlot.cpp \
         FitRideFile.cpp \
+        GcJsonRideFile.cpp \
         GcRideFile.cpp \
         GoogleMapControl.cpp \
         HistogramWindow.cpp \

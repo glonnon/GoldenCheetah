@@ -23,6 +23,7 @@
 #include "Zones.h"
 #include "Settings.h"
 #include "Units.h"
+#include "GcJsonRideFile.h"
 
 #include <QDebug>
 
@@ -156,7 +157,7 @@ GoogleMapControl::GoogleMapControl(MainWindow *mw)
 void
 GoogleMapControl::rideSelected()
 {
-  RideItem * ride = parent->rideItem();
+  ride = parent->rideItem();
 
   if (!ride)
       return;
@@ -224,10 +225,22 @@ void GoogleMapControl::loadRide()
 
     if(newRideToLoad == true)
     {
-        createHtml();
         newRideToLoad = false;
         loadingPage = true;
+        if (ride != NULL)
+        {
+            GcJsonFileReader jsonWriter;
+            QString jsonFile(QDir::tempPath());
+            jsonFile.append("/jsonFile.js");
+            QFile file(jsonFile);
+            file.remove();
+            file.open(QIODevice::ReadWrite);
+            jsonWriter.writeRideFile(ride->ride(),file);
+            file.flush();
+            file.close();
+        }
 
+        createHtml();
         QString htmlFile(QDir::tempPath());
         htmlFile.append("/maps.html");
         QFile file(htmlFile);
@@ -455,3 +468,5 @@ string GoogleMapControl::CreateIntervalMarkers()
     }
     return oss.str();
 }
+
+

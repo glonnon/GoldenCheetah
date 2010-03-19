@@ -48,6 +48,7 @@ Q_OBJECT
                            std::ostringstream &oss,
                            QColor color);
     std::string CreateIntervalMarkers();
+    std::string CreateRideJsonFile();
     void loadRide();
     // the web browser is loading a page, do NOT start another load
     bool loadingPage;
@@ -56,6 +57,7 @@ Q_OBJECT
 
     QColor GetColor(int cp, int watts);
 
+    RideItem *ride;
     // a GPS normalized vectory of ride data points,
     // when a GPS unit loses signal it seems to
     // put a coordinate close to 180 into the data
