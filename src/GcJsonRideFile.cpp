@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <QScriptEngine>
 
 #define DATETIME_FORMAT "yyyy/MM/dd hh:mm:ss' UTC'"
 
@@ -32,10 +33,36 @@ static int gcJsonFileReaderRegistered =
         "gcJson", "GoldenCheetah Json Native Format", new GcJsonFileReader());
 
 RideFile *
-GcJsonFileReader::openRideFile(QFile &, QStringList &) const
+GcJsonFileReader::openRideFile(QFile &file, QStringList &) const
 {
-    // TBD...
-    assert(false);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return NULL;
+
+    QByteArray result;
+
+    while (!file.atEnd()) {
+        result.append(file.readLine());
+    }
+
+    QScriptValue sc;
+    QScriptEngine engine;
+    sc = engine.evaluate(QString(result));
+    // pull out the ride data
+    if(sc.property("ride").isValid())
+    {
+
+    }
+    // pull out the intervals
+    if(sc.property("intervals").isValid())
+    {
+
+    }
+    // pull out the ride points
+    if(sc.property("samples").isValid())
+    {
+
+    }
+    return NULL;
 }
 
 using namespace std;

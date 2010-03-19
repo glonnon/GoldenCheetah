@@ -7,7 +7,7 @@ TARGET = GoldenCheetah
 DEPENDPATH += .
 !isEmpty( BOOST_INCLUDE ) { INCLUDEPATH += $${BOOST_INCLUDE} }
 INCLUDEPATH += ../qwt/src
-QT += xml sql network webkit
+QT += xml sql network webkit script
 LIBS += ../qwt/lib/libqwt.a
 LIBS += -lm
 
