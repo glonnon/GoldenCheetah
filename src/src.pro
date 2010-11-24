@@ -190,6 +190,7 @@ HEADERS += \
         ViewSelection.h \
         WeeklySummaryWindow.h \
         WkoRideFile.h \
+        WorkoutEditor.h \
         Zones.h \
         ZoneScaleDraw.h
 
@@ -306,6 +307,7 @@ SOURCES += \
         ViewSelection.cpp \
         WeeklySummaryWindow.cpp \
         WkoRideFile.cpp \
+        WorkoutEditor.cpp \
         Zones.cpp \
         main.cpp \
 
@@ -313,3 +315,4 @@ RESOURCES = application.qrc
 
 TRANSLATIONS = translations/gc_fr.ts translations/gc_ja.ts
 
+FORMS = WorkoutEditor.ui
