@@ -181,6 +181,7 @@ class MainWindow : public QMainWindow
         bool saveRideExitDialog();              // save dirty rides on exit dialog
         void showOptions();
         void showTools();
+        void showWorkoutEditor();
 	void importRideToDB();
         void scanForMissing();
 	void dateChanged(const QDate &);

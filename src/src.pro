@@ -252,6 +252,7 @@ HEADERS += \
         WeeklyViewItemDelegate.h \
         WithingsDownload.h \
         WkoRideFile.h \
+        WorkoutEditor.h \
         Zones.h \
         ZoneScaleDraw.h
 
@@ -403,6 +404,7 @@ SOURCES += \
         WithingsDownload.cpp \
         WeeklySummaryWindow.cpp \
         WkoRideFile.cpp \
+        WorkoutEditor.cpp \
         Zones.cpp \
         main.cpp \
 
@@ -414,3 +416,4 @@ TRANSLATIONS = translations/gc_fr.ts \
                translations/gc_pt-br.ts \
                translations/gc_de.ts
 
+FORMS = WorkoutEditor.ui
