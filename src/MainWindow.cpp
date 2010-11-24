@@ -71,6 +71,8 @@
 #include "PerformanceManagerWindow.h"
 #include "TrainWindow.h"
 #include "TwitterDialog.h"
+#include "WorkoutEditor.h"
+
 
 #ifndef GC_VERSION
 #define GC_VERSION "(developer build)"
@@ -411,6 +413,9 @@ MainWindow::MainWindow(const QDir &home) :
                            SLOT(showOptions()), tr("Ctrl+O")); 
     optionsMenu->addAction(tr("Critical Power Calculator"), this,
                            SLOT(showTools()));
+    optionsMenu->addAction(tr("Workout Editor"), this,
+                           SLOT(showWorkoutEditor()));
+
     //optionsMenu->addAction(tr("&Reset Metrics..."), this, 
     //                       SLOT(importRideToDB()), tr("Ctrl+R")); 
     //optionsMenu->addAction(tr("&Update Metrics..."), this, 
@@ -1388,6 +1393,12 @@ void MainWindow::showTools()
 {
    ToolsDialog *td = new ToolsDialog();
    td->show();
+}
+
+void MainWindow::showWorkoutEditor()
+{
+   WorkoutEditor *we = new WorkoutEditor();
+   we->show();
 }
 
 void
