@@ -27,12 +27,36 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
 {
     Q_OBJECT
 
-    public:
+ protected:
+    // data
+    bool isEnglish;
+    enum WorkoutTypeEnum { WT_ERG, WT_MRC, WT_CRS };
+    WorkoutTypeEnum workoutType;
+
+    // methods
+    void setup();
+    void update();
+
+
+ public:
     WorkoutEditor(QWidget *parent = NULL) :QWidget(parent)
     {
         setupUi(this);
+        setup();
+        isEnglish = true;
+        workoutType = WT_ERG;
+
     }
-    void JustATest();
+ public slots:
+    void unitsChanged(QAbstractButton *button);
+    void workoutTypeChanged(QAbstractButton *button);
+    void saveWorkout();
+    void reset();
+    void validateCell(QTableWidgetItem *,QTableWidgetItem *);
+    void addRow();
+    void insertRow();
+    void deleteRow();
+
 
 };
 
