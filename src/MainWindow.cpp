@@ -1397,7 +1397,8 @@ void MainWindow::showTools()
 
 void MainWindow::showWorkoutEditor()
 {
-   WorkoutEditor *we = new WorkoutEditor();
+   int ftp = zones_->getCP(zones_->whichRange(QDate::currentDate()));
+   WorkoutEditor *we = new WorkoutEditor(NULL,ftp);
    we->show();
 }
 
