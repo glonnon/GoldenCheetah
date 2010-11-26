@@ -1,18 +1,31 @@
+/*
+ * Copyright (c) 2010 Greg Lonnon (greg.lonnon@gmail.com)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "WorkoutEditor.h"
 
-#include <iostream>
 
 #include <QFileDialog>
 #include <QDebug>
-
-#include <boost/shared_array.hpp>
 #include <Settings.h>
 #include <QTextStream>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
-
-#include <Zones.h>
 
 // setup: initializes the form
 void WorkoutEditor::setup()
@@ -85,7 +98,6 @@ void WorkoutEditor::saveWorkout()
     QString filename = QFileDialog::getSaveFileName(this,QString("Save Workout"),
                                  workoutDir.toString(),"Computrainer Format *.erg *.crs *.mrc");
     // open the file
-
     QFile f(filename);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
@@ -100,7 +112,7 @@ void WorkoutEditor::saveWorkout()
     stream << endl;
     stream << "DESCRIPTION = " << descriptionText->text();
     stream << "FILE NAME = " << filename << endl;
-    stream << "FTP = " << 300 << endl;  // TODO: use the zones to get the current CP???
+    stream << "FTP = " << ftp << endl;
     if(workoutType == WT_ERG) {
         stream << "MINUTES WATTS" << endl;
     }
@@ -158,7 +170,7 @@ void WorkoutEditor::update()
 
     workoutTable->setHorizontalHeaderLabels(colms);
     workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
-    workoutPlot->setAxisTitle(QwtPlot::yLeft,"Effort");
+    workoutPlot->setAxisTitle(QwtPlot::yLeft,"Watts");
     // update the plot
     std::vector<std::pair<double,double> > workoutData;
     QVector<double> xData;
@@ -190,15 +202,14 @@ void WorkoutEditor::update()
     }
     QColor brush_color = QColor(124, 91, 31);
     brush_color.setAlpha(64);
-    workoutCurve->setBrush(brush_color);   // fill below the line
-
+    workoutCurve->setBrush(brush_color);
     workoutCurve->setData(xData,yData);
     workoutCurve->attach(workoutPlot);
     workoutPlot->replot();
 
     this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
     this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
-    // BikeScore is easy...  avgpower/ftp * minutes /60 * 100
+    // BikeScore is easy...  We don't have to do the xPower, because power is constant
     int BikeScore = TotalPowerTime/(ftp *60)* 100;
     this->bikeScoreLabel->setText(QString::number(BikeScore));
 }
