@@ -20,6 +20,7 @@
 #define _GC_WORKOUTEDITOR_H
 
 #include <QWidget>
+class QwtPlotCurve;
 
 #include "ui_WorkoutEditor.h"
 
@@ -29,9 +30,11 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
 
  protected:
     // data
-    bool isEnglish;
+    int ftp;
+    bool useMetricUnits;
     enum WorkoutTypeEnum { WT_ERG, WT_MRC, WT_CRS };
     WorkoutTypeEnum workoutType;
+    QwtPlotCurve *workoutCurve;
 
     // methods
     void setup();
@@ -39,20 +42,23 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
 
 
  public:
-    WorkoutEditor(QWidget *parent = NULL) :QWidget(parent)
+    WorkoutEditor(QWidget *parent = NULL, int _ftp =0) :QWidget(parent)
     {
+        useMetricUnits = false;
+        workoutType = WT_ERG;
+        ftp = _ftp;
         setupUi(this);
         setup();
-        isEnglish = true;
-        workoutType = WT_ERG;
+
 
     }
+
  public slots:
     void unitsChanged(QAbstractButton *button);
     void workoutTypeChanged(QAbstractButton *button);
     void saveWorkout();
     void reset();
-    void validateCell(QTableWidgetItem *,QTableWidgetItem *);
+    void cellChanged(int,int);
     void addRow();
     void insertRow();
     void deleteRow();

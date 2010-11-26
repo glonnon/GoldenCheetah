@@ -12,27 +12,15 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+#include <Zones.h>
 
-
-class WorkoutItem : public QTableWidgetItem
-{
-public:
-    void setData(int role, const QVariant &value)
-    {
-        QTableWidgetItem::setData(role,value);
-    }
-    WorkoutItem *clone()
-    {
-        qDebug() << "cloning";
-        return new WorkoutItem();
-    }
-
-};
-
+// setup: initializes the form
 void WorkoutEditor::setup()
 {
-    // wire up the widget...  I think this can be done in Designer, but I
-    // am a Designer noob...
+    // set the ftp to be the current riders FTP
+    ftpSpinBox->setValue(ftp);
+
+    // wire up the widget...
 
     // if the Units change, make sure to change the colms
     connect(UnitButtonGroup,SIGNAL(buttonClicked(QAbstractButton *)),
@@ -43,15 +31,10 @@ void WorkoutEditor::setup()
     connect(WorkoutTypeButtonGroup, SIGNAL(buttonClicked(QAbstractButton *)),
             this, SLOT(workoutTypeChanged(QAbstractButton *)));
 
-    // Update the Workout Metrics on every add/delete to the Workout Segments
-    //connect(workoutTable,SIGNAL(currentItemChanged(QTableWidgetItem *,QTableWidgetItem *)),this,SLOT(validateCell(QTableWidgetItem *, QTableWidgetItem *)));
-
-    // update the Plot on every add/delete to the workout Segments
-    workoutTable->setItemPrototype(new WorkoutItem());
-
+    // Update the Workout Metrics on every add/delete/edit to the Workout Segments
+    connect(workoutTable,SIGNAL(cellChanged(int,int)),this,SLOT(cellChanged(int,int)));
     connect(addRowButton,SIGNAL(clicked()),this,SLOT(addRow()));
     connect(deleteRowButton,SIGNAL(clicked()),this,SLOT(deleteRow()));
-
     connect(insertRowButton,SIGNAL(clicked()),this,SLOT(insertRow()));
 
     // on save/cancel/reset do the right thing...
@@ -59,8 +42,9 @@ void WorkoutEditor::setup()
     connect(SaveCancelButtonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect((QObject*)SaveCancelButtonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), this, SLOT(reset()));
 
-
-
+    workoutCurve = new QwtPlotCurve("Watts");
+    workoutCurve->setBaseline(0);
+    workoutCurve->setStyle(QwtPlotCurve::Steps);
     update();
 }
 
@@ -80,14 +64,15 @@ void WorkoutEditor::deleteRow()
     workoutTable->removeRow(workoutTable->currentRow());
 }
 
-void WorkoutEditor::validateCell(QTableWidgetItem *cur , QTableWidgetItem *prev)
+void WorkoutEditor::cellChanged(int row, int colm)
 {
-    bool ok;
-    cur->data(Qt::EditRole).toDouble(&ok);
-    if(!ok)
-    {
-        qDebug() << "invalid data";
-    }
+    QTableWidgetItem *item = workoutTable->item(row,colm);
+
+    double d = item->text().toDouble();
+    QVariant data;
+    data.setValue(d);
+    item->setData(Qt::DisplayRole,data);
+    update();
 }
 
 
@@ -108,7 +93,7 @@ void WorkoutEditor::saveWorkout()
     stream << "[COURSE HEADER]" << endl;
     stream << "VERSION = 2" << endl;
     stream << "UNITS = ";
-    if(isEnglish == true)
+    if(useMetricUnits == true)
         stream << "ENGLISH";
     else
         stream << "METRIC";
@@ -150,10 +135,8 @@ void WorkoutEditor::reset()
 
 void WorkoutEditor::update()
 {
-    std::cout << "update " << workoutType << ":" << isEnglish << std::endl;
+
     QStringList colms;
-
-
     // update colm headers
     if(workoutType != WT_CRS)
     {
@@ -161,7 +144,7 @@ void WorkoutEditor::update()
     }
     else
     {
-        if(isEnglish)
+        if(!useMetricUnits)
             colms.append("Miles");
         else
             colms.append("KM");
@@ -177,38 +160,34 @@ void WorkoutEditor::update()
     workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
     workoutPlot->setAxisTitle(QwtPlot::yLeft,"Effort");
     // update the plot
-
-    QwtPlotCurve *workoutCurve = new QwtPlotCurve("Watts");
+    std::vector<std::pair<double,double> > workoutData;
     QVector<double> xData;
     QVector<double> yData;
     xData.append(0);
     yData.append(0);
     int row = 0;
     int numRows = workoutTable->rowCount();
+    double TotalPowerTime = 0;
+    double TotalTime = 0;
     double currentX = 0;
 
     while(row < numRows)
     {
-        QTableWidgetItem *item = workoutTable->item(row,0);
-
-        if(item)
+        QTableWidgetItem *itemX = workoutTable->item(row,0);
+        QTableWidgetItem *itemY = workoutTable->item(row,1);
+        if(itemX && itemY)
         {
+            double x = itemX->text().toDouble();
+            double y = itemY->text().toDouble();
+            currentX += x;
             xData.append(currentX);
-            currentX += item->text().toDouble();
-            xData.append(currentX);
-        }
+            yData.append(y);
 
-        item = workoutTable->item(row,1);
-        if(item)
-        {
-            double y = item->text().toDouble();
-            yData.append(y);
-            yData.append(y);
+            TotalTime += x;
+            TotalPowerTime += x * y;
         }
         row++;
     }
-    xData.append(0);
-    yData.append(0);
     QColor brush_color = QColor(124, 91, 31);
     brush_color.setAlpha(64);
     workoutCurve->setBrush(brush_color);   // fill below the line
@@ -216,18 +195,24 @@ void WorkoutEditor::update()
     workoutCurve->setData(xData,yData);
     workoutCurve->attach(workoutPlot);
     workoutPlot->replot();
+
+    this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
+    this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
+    // BikeScore is easy...  avgpower/ftp * minutes /60 * 100
+    int BikeScore = TotalPowerTime/(ftp *60)* 100;
+    this->bikeScoreLabel->setText(QString::number(BikeScore));
 }
 
 void WorkoutEditor::unitsChanged(QAbstractButton *button)
 {
-    bool oldValue = isEnglish;
+    bool oldValue = useMetricUnits;
 
     if(button->text() == QString("English"))
-        isEnglish = true;
+        useMetricUnits = false;
     else
-        isEnglish = false;
+        useMetricUnits = true;
 
-    if(oldValue != isEnglish)
+    if(oldValue != useMetricUnits)
         update();
 }
 
@@ -242,5 +227,8 @@ void WorkoutEditor::workoutTypeChanged(QAbstractButton *button)
     else
         workoutType = WT_CRS;
     if(oldValue != workoutType)
+    {
+        reset(); // the data is incorrect
         update();
+    }
 }
