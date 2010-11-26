@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>679</width>
-    <height>437</height>
+    <height>492</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -138,7 +138,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QwtPlot" name="qwtPlot">
+  <widget class="QwtPlot" name="workoutPlot">
    <property name="geometry">
     <rect>
      <x>260</x>
@@ -152,9 +152,9 @@
    <property name="geometry">
     <rect>
      <x>339</x>
-     <y>70</y>
-     <width>211</width>
-     <height>111</height>
+     <y>50</y>
+     <width>281</width>
+     <height>131</height>
     </rect>
    </property>
    <property name="title">
@@ -166,7 +166,7 @@
       <x>10</x>
       <y>20</y>
       <width>241</width>
-      <height>65</height>
+      <height>111</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -187,7 +187,38 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>TSS</string>
+        <string>BikeScore</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="ftpSpinBox"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="tssLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="avgPowerLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>kJoule</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </item>
@@ -216,10 +247,10 @@
      </rect>
     </property>
     <property name="editTriggers">
-     <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+     <set>QAbstractItemView::AllEditTriggers</set>
     </property>
     <property name="rowCount">
-     <number>3</number>
+     <number>1</number>
     </property>
     <property name="columnCount">
      <number>2</number>
@@ -230,8 +261,6 @@
     <attribute name="horizontalHeaderStretchLastSection">
      <bool>true</bool>
     </attribute>
-    <row/>
-    <row/>
     <row/>
     <column>
      <property name="text">
@@ -248,15 +277,64 @@
   <widget class="QDialogButtonBox" name="SaveCancelButtonBox">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>390</y>
-     <width>201</width>
+     <x>180</x>
+     <y>440</y>
+     <width>241</width>
      <height>27</height>
     </rect>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Open|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
    </property>
+  </widget>
+  <widget class="QFrame" name="frame">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>380</y>
+     <width>211</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="deleteRowButton">
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="insertRowButton">
+       <property name="text">
+        <string>Insert</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addRowButton">
+       <property name="text">
+        <string>Add</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
