@@ -40,7 +40,6 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     void setup();
     void update();
 
-
  public:
     WorkoutEditor(QWidget *parent = NULL, int _ftp =0) :QWidget(parent)
     {
@@ -49,8 +48,6 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
         ftp = _ftp;
         setupUi(this);
         setup();
-
-
     }
 
  public slots:
@@ -62,8 +59,6 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     void addRow();
     void insertRow();
     void deleteRow();
-
-
 };
 
-#endif // _GC_COMPUTRAINER3DP_H
+#endif // _GC_WORKOUTEDITOR_H
