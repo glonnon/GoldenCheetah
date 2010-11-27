@@ -171,6 +171,8 @@ void WorkoutEditor::update()
     workoutTable->setHorizontalHeaderLabels(colms);
     workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
     workoutPlot->setAxisTitle(QwtPlot::yLeft,"Watts");
+    workoutPlot->setAxisAutoScale(QwtPlot::yLeft);
+
     // update the plot
     std::vector<std::pair<double,double> > workoutData;
     QVector<double> xData;
@@ -191,10 +193,10 @@ void WorkoutEditor::update()
         {
             double x = itemX->text().toDouble();
             double y = itemY->text().toDouble();
+            if(workoutType == WT_MRC) y = y * ftp /100; // if MRC, convert to abs power
             currentX += x;
             xData.append(currentX);
             yData.append(y);
-
             TotalTime += x;
             TotalPowerTime += x * y;
         }
