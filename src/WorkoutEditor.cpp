@@ -57,10 +57,9 @@ void WorkoutEditor::setup()
 
     workoutCurve = new QwtPlotCurve("Watts");
     workoutCurve->setBaseline(0);
-    workoutCurve->setStyle(QwtPlotCurve::Steps);
+
     update();
 }
-
 
 void WorkoutEditor::addRow()
 {
@@ -75,13 +74,20 @@ void WorkoutEditor::insertRow()
 void WorkoutEditor::deleteRow()
 {
     workoutTable->removeRow(workoutTable->currentRow());
+    update();
 }
 
 void WorkoutEditor::cellChanged(int row, int colm)
 {
     QTableWidgetItem *item = workoutTable->item(row,colm);
-
     double d = item->text().toDouble();
+    if(workoutType == WT_CRS)
+    {
+        // make sure the computrainer has a reasonable slope
+        if(d < -15) d = -15;
+        if(d > 15) d = 15;
+    }
+    else if(d < 0 ) d = 0;  // don't allow neg numbers
     QVariant data;
     data.setValue(d);
     item->setData(Qt::DisplayRole,data);
@@ -105,13 +111,13 @@ void WorkoutEditor::saveWorkout()
     stream << "[COURSE HEADER]" << endl;
     stream << "VERSION = 2" << endl;
     stream << "UNITS = ";
-    if(useMetricUnits == true)
+    if(useMetricUnits == false)
         stream << "ENGLISH";
     else
         stream << "METRIC";
     stream << endl;
-    stream << "DESCRIPTION = " << descriptionText->text();
-    stream << "FILE NAME = " << filename << endl;
+    stream << "DESCRIPTION = " << descriptionText->text() << endl;
+    stream << "FILE NAME = " << f.fileName() << endl;
     stream << "FTP = " << ftp << endl;
     if(workoutType == WT_ERG) {
         stream << "MINUTES WATTS" << endl;
@@ -130,11 +136,16 @@ void WorkoutEditor::saveWorkout()
     int row = 0;
     while(row < numRows)
     {
-        stream << workoutTable->item(row,0)->text();
-        stream << " " <<  workoutTable->item(row,1)->text();
-        if(workoutType == WT_MRC) stream << "%";
-        else if(workoutType == WT_CRS) stream << " 0";
-        stream << endl;
+        QTableWidgetItem *colm1 = workoutTable->item(row,0);
+        QTableWidgetItem *colm2 = workoutTable->item(row,1);
+        if(colm1 && colm2)
+        {
+            stream << colm1->text();
+            stream << " " << colm2->text();
+            if(workoutType == WT_MRC) stream << "%";
+            else if(workoutType == WT_CRS) stream << " 0";
+            stream << endl;
+        }
         row++;
     }
     stream << "[END COURSE DATA]" << endl;
@@ -161,6 +172,7 @@ void WorkoutEditor::update()
         else
             colms.append("KM");
     }
+
     if(workoutType == WT_CRS)
         colms.append("Slope");
     else if (workoutType == WT_MRC)
@@ -169,12 +181,29 @@ void WorkoutEditor::update()
         colms.append("Watts");
 
     workoutTable->setHorizontalHeaderLabels(colms);
-    workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
-    workoutPlot->setAxisTitle(QwtPlot::yLeft,"Watts");
+
+    if(workoutType == WT_CRS)
+    {
+        workoutCurve->setStyle(QwtPlotCurve::Lines);
+        if(!useMetricUnits) {
+              workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (feet)");
+              workoutPlot->setAxisTitle(QwtPlot::xBottom,"Miles");
+        }
+        else
+        {
+              workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (meters)");
+              workoutPlot->setAxisTitle(QwtPlot::xBottom,"KM");
+        }
+    }
+    else
+    {
+        workoutCurve->setStyle(QwtPlotCurve::Steps);
+        workoutPlot->setAxisTitle(QwtPlot::yLeft,"Watts");
+        workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
+    }
     workoutPlot->setAxisAutoScale(QwtPlot::yLeft);
 
     // update the plot
-    std::vector<std::pair<double,double> > workoutData;
     QVector<double> xData;
     QVector<double> yData;
     xData.append(0);
@@ -184,6 +213,8 @@ void WorkoutEditor::update()
     double TotalPowerTime = 0;
     double TotalTime = 0;
     double currentX = 0;
+    double currentElevation = 0;
+    double totalClimbed = 0;
 
     while(row < numRows)
     {
@@ -193,7 +224,18 @@ void WorkoutEditor::update()
         {
             double x = itemX->text().toDouble();
             double y = itemY->text().toDouble();
-            if(workoutType == WT_MRC) y = y * ftp /100; // if MRC, convert to abs power
+
+            if(workoutType == WT_MRC)
+            {
+                y = y * ftp /100; // if MRC, convert to abs power
+            }
+            else if(workoutType == WT_CRS)
+            {
+                y= x * (useMetricUnits ? 1000 : 5280) * y / 100;
+                currentElevation += y;
+                if(y > 0) totalClimbed += y;
+                y = currentElevation;
+            }
             currentX += x;
             xData.append(currentX);
             yData.append(y);
@@ -209,11 +251,33 @@ void WorkoutEditor::update()
     workoutCurve->attach(workoutPlot);
     workoutPlot->replot();
 
-    this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
-    this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
-    // BikeScore is easy...  We don't have to do the xPower, because power is constant
-    int BikeScore = TotalPowerTime/(ftp *60)* 100;
-    this->bikeScoreLabel->setText(QString::number(BikeScore));
+    if(workoutType == WT_CRS)
+    {
+        QString distanceUnits = " Miles";
+        QString climbUnits = " Feet";
+
+        this->avgPowerOrElevationLabel->setText("Elevation");
+        this->bikeScoreOrDistance->setText("Distance");
+        if(useMetricUnits)
+        {
+            distanceUnits = " KM";
+            climbUnits = " M";
+        }
+        // set the data...
+
+        this->avgPowerLabel->setText(QString::number((int)totalClimbed) + climbUnits);
+        this->kJouleLabel->setText("unknown");
+        // BikeScore is easy...  We don't have to do the xPower, because power is constant
+        this->bikeScoreLabel->setText(QString::number(TotalTime) + distanceUnits);
+    }
+    else
+    {
+       this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
+       this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
+       // BikeScore is easy...  We don't have to do the xPower, because power is constant
+       int BikeScore = TotalPowerTime/(ftp *60)* 100;
+       this->bikeScoreLabel->setText(QString::number(BikeScore));
+    }
 }
 
 void WorkoutEditor::unitsChanged(QAbstractButton *button)

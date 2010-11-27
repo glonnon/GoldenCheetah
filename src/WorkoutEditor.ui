@@ -39,10 +39,10 @@
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>70</y>
-     <width>241</width>
-     <height>111</height>
+     <x>140</x>
+     <y>50</y>
+     <width>181</width>
+     <height>101</height>
     </rect>
    </property>
    <property name="title">
@@ -103,8 +103,8 @@
   <widget class="QGroupBox" name="groupBox_2">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>70</y>
+     <x>10</x>
+     <y>50</y>
      <width>110</width>
      <height>86</height>
     </rect>
@@ -113,7 +113,17 @@
     <string>Units</string>
    </property>
    <layout class="QFormLayout" name="formLayout_2">
-    <item row="0" column="0">
+    <item row="1" column="0">
+     <widget class="QCheckBox" name="metricButton">
+      <property name="text">
+       <string>Metric</string>
+      </property>
+      <attribute name="buttonGroup">
+       <string>UnitButtonGroup</string>
+      </attribute>
+     </widget>
+    </item>
+    <item row="2" column="0">
      <widget class="QCheckBox" name="englishButton">
       <property name="text">
        <string>English</string>
@@ -126,24 +136,14 @@
       </attribute>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QCheckBox" name="metricButton">
-      <property name="text">
-       <string>Metric</string>
-      </property>
-      <attribute name="buttonGroup">
-       <string>UnitButtonGroup</string>
-      </attribute>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QwtPlot" name="workoutPlot">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>299</x>
      <y>190</y>
-     <width>400</width>
+     <width>361</width>
      <height>281</height>
     </rect>
    </property>
@@ -151,10 +151,10 @@
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
-     <x>339</x>
+     <x>340</x>
      <y>50</y>
-     <width>281</width>
-     <height>131</height>
+     <width>331</width>
+     <height>121</height>
     </rect>
    </property>
    <property name="title">
@@ -164,9 +164,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>20</y>
-      <width>241</width>
-      <height>111</height>
+      <y>30</y>
+      <width>191</width>
+      <height>91</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -177,17 +177,45 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="3" column="0">
+      <widget class="QLabel" name="avgPowerOrElevationLabel">
        <property name="text">
         <string>Average Power</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
+     <item row="2" column="0">
+      <widget class="QLabel" name="bikeScoreOrDistance">
        <property name="text">
         <string>BikeScore</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="bikeScoreLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLabel" name="avgPowerLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>kJoule</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QLabel" name="kJouleLabel">
+       <property name="text">
+        <string>0</string>
        </property>
       </widget>
      </item>
@@ -204,34 +232,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLabel" name="bikeScoreLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="avgPowerLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>kJoule</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="kJouleLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </widget>
   </widget>
@@ -239,56 +239,91 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>170</y>
+     <y>160</y>
      <width>261</width>
-     <height>221</height>
+     <height>261</height>
     </rect>
    </property>
    <property name="title">
     <string>Workout Segments</string>
    </property>
-   <widget class="QTableWidget" name="workoutTable">
+   <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>211</width>
-      <height>181</height>
+      <x>9</x>
+      <y>30</y>
+      <width>251</width>
+      <height>221</height>
      </rect>
     </property>
-    <property name="inputMethodHints">
-     <set>Qt::ImhDigitsOnly</set>
-    </property>
-    <property name="editTriggers">
-     <set>QAbstractItemView::AllEditTriggers</set>
-    </property>
-    <property name="alternatingRowColors">
-     <bool>true</bool>
-    </property>
-    <property name="rowCount">
-     <number>2</number>
-    </property>
-    <property name="columnCount">
-     <number>2</number>
-    </property>
-    <attribute name="horizontalHeaderVisible">
-     <bool>true</bool>
-    </attribute>
-    <attribute name="horizontalHeaderStretchLastSection">
-     <bool>true</bool>
-    </attribute>
-    <row/>
-    <row/>
-    <column>
-     <property name="text">
-      <string>Minutes</string>
-     </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>Data</string>
-     </property>
-    </column>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QTableWidget" name="workoutTable">
+       <property name="inputMethodHints">
+        <set>Qt::ImhDigitsOnly</set>
+       </property>
+       <property name="editTriggers">
+        <set>QAbstractItemView::AllEditTriggers</set>
+       </property>
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="rowCount">
+        <number>2</number>
+       </property>
+       <property name="columnCount">
+        <number>2</number>
+       </property>
+       <attribute name="horizontalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <row/>
+       <row/>
+       <column>
+        <property name="text">
+         <string>Minutes</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Data</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="deleteRowButton">
+           <property name="text">
+            <string>Delete</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="insertRowButton">
+           <property name="text">
+            <string>Insert</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="addRowButton">
+           <property name="text">
+            <string>Add</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QDialogButtonBox" name="SaveCancelButtonBox">
@@ -303,55 +338,6 @@
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
    </property>
-  </widget>
-  <widget class="QFrame" name="frame">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>380</y>
-     <width>211</width>
-     <height>41</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QWidget" name="horizontalLayoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>0</y>
-      <width>191</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QPushButton" name="deleteRowButton">
-       <property name="text">
-        <string>Delete</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="insertRowButton">
-       <property name="text">
-        <string>Insert</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addRowButton">
-       <property name="text">
-        <string>Add</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
   </widget>
  </widget>
  <customwidgets>
