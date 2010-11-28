@@ -114,6 +114,8 @@ class RealtimeWindow : public QWidget
         double displayDistance, displayWorkoutDistance;
         int displayLap;            // user increment for Lap
         int displayWorkoutLap;     // which Lap in the workout are we at?
+        double kjoules;
+        double bikescore;
 
         // for non-zero average calcs
         int pwrcount, cadcount, hrcount, spdcount, lodcount, grdcount; // for NZ average calc
@@ -143,7 +145,9 @@ class RealtimeWindow : public QWidget
                     *lapLabel,
                     *laptimeLabel,
                     *timeLabel,
-                    *distanceLabel;
+                    *distanceLabel,
+                    *kjouleLabel,
+                    *bikescoreLabel;
 
         double avgPower, avgHeartRate, avgSpeed, avgCadence, avgLoad, avgGradient;
         QLabel *avgpowerLabel,
@@ -174,7 +178,9 @@ class RealtimeWindow : public QWidget
                     *lapLCD,
                     *laptimeLCD,
                     *timeLCD,
-                    *distanceLCD;
+                    *distanceLCD,
+                    *kjouleLCD,
+                    *bikescoreLCD;
 
         QLCDNumber *avgpowerLCD,
                     *avgheartrateLCD,

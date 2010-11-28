@@ -185,6 +185,9 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     loadLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     distanceLabel = new QLabel(useMetricUnits ? tr("Distance (KM)") : tr("Distance (Miles)"), this);
     distanceLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    kjouleLabel = new QLabel(tr("kJoules"),this);
+    kjouleLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+
 
     avgpowerLabel = new QLabel(tr("Avg WATTS"), this);
     avgpowerLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
@@ -196,6 +199,8 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     avgcadenceLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     avgloadLabel = new QLabel(tr("Avg Load WATTS"), this);
     avgloadLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    bikescoreLabel = new QLabel(tr("BikeScore"),this);
+    bikescoreLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
 
     laptimeLabel = new QLabel(tr("LAP TIME"), this);
     laptimeLabel->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
@@ -209,6 +214,8 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     lapLCD = new QLCDNumber(this); lapLCD->setSegmentStyle(QLCDNumber::Filled);
     loadLCD = new QLCDNumber(this); loadLCD->setSegmentStyle(QLCDNumber::Filled);
     distanceLCD = new QLCDNumber(this); distanceLCD->setSegmentStyle(QLCDNumber::Filled);
+    kjouleLCD = new QLCDNumber(this); distanceLCD->setSegmentStyle(QLCDNumber::Filled);
+    bikescoreLCD = new QLCDNumber(this); distanceLCD->setSegmentStyle(QLCDNumber::Filled);
 
     avgpowerLCD = new QLCDNumber(this); avgpowerLCD->setSegmentStyle(QLCDNumber::Filled);
     avgheartrateLCD = new QLCDNumber(this); avgheartrateLCD->setSegmentStyle(QLCDNumber::Filled);
@@ -228,17 +235,20 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     gridLayout->addWidget(speedLabel, 1, 3);
     gridLayout->addWidget(distanceLabel, 1, 4);
     gridLayout->addWidget(lapLabel, 1, 5);
+    gridLayout->addWidget(kjouleLabel,1,6);
     gridLayout->addWidget(powerLCD, 2, 0);
     gridLayout->addWidget(cadenceLCD, 2, 1);
     gridLayout->addWidget(heartrateLCD, 2, 2);
     gridLayout->addWidget(speedLCD, 2, 3);
     gridLayout->addWidget(distanceLCD, 2, 4);
     gridLayout->addWidget(lapLCD, 2, 5);
+    gridLayout->addWidget(kjouleLCD,2,6);
     gridLayout->addWidget(avgpowerLabel, 3, 0);
     gridLayout->addWidget(avgcadenceLabel, 3, 1);
     gridLayout->addWidget(avgheartrateLabel, 3, 2);
     gridLayout->addWidget(avgspeedLabel, 3, 3);
     gridLayout->addWidget(avgloadLabel, 3, 4);
+    gridLayout->addWidget(bikescoreLabel,3,6);
     gridLayout->addWidget(loadLabel, 3, 5);
     gridLayout->addWidget(loadLCD, 4, 5);
     gridLayout->addWidget(avgpowerLCD, 4, 0);
@@ -246,6 +256,7 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     gridLayout->addWidget(avgheartrateLCD, 4, 2);
     gridLayout->addWidget(avgspeedLCD, 4, 3);
     gridLayout->addWidget(avgloadLCD, 4, 4);
+    gridLayout->addWidget(bikescoreLCD,4,6);
     gridLayout->setRowStretch(2, 4);
     gridLayout->setRowStretch(4, 3);
 
@@ -567,6 +578,7 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     if (displayPower) { //NZAP is bogus - make it configurable!!!
         pwrcount++; if (pwrcount ==1) avgPower = displayPower;
         avgPower = ((avgPower * (double)pwrcount) + displayPower) /(double) (pwrcount+1);
+        kjoules = avgPower * total_msecs /(1000*1000);
     }
     if (displayCadence) {
         cadcount++; if (cadcount ==1) avgCadence = displayCadence;
@@ -597,7 +609,7 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     avgspeedLCD->display(avgspeedStr);
     avgcadenceLCD->display((int)avgCadence);
     avgheartrateLCD->display((int)avgHeartRate);
-
+    kjouleLCD->display(round(kjoules));
 
     // now that plot....
     rtPlot->pwrData.addData(displayPower); // add new data point
