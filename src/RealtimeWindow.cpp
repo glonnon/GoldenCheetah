@@ -549,7 +549,9 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
 
     // Cadence, HR and Power needs to be rounded to 0 decimal places
     powerLCD->display(round(displayPower));
-    speedLCD->display(round(displaySpeed * (useMetricUnits ? 1.0 : MILES_PER_KM) * 10.00)/10.00);
+    displaySpeed *=(useMetricUnits ? 1.0 : MILES_PER_KM);
+    QString speedStr = QString::number(displaySpeed,'f', 1);
+    speedLCD->display(speedStr);
     cadenceLCD->display(round(displayCadence));
     heartrateLCD->display(round(displayHeartRate));
     lapLCD->display(displayWorkoutLap+displayLap);
@@ -590,7 +592,9 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     }
 
     avgpowerLCD->display((int)avgPower);
-    avgspeedLCD->display(round(avgSpeed * (useMetricUnits ? 1.0 : MILES_PER_KM) * 10.00)/10.00);
+    avgSpeed *=(useMetricUnits ? 1.0 : MILES_PER_KM);
+    QString avgspeedStr = QString::number(avgSpeed,'f', 1);
+    avgspeedLCD->display(avgspeedStr);
     avgcadenceLCD->display((int)avgCadence);
     avgheartrateLCD->display((int)avgHeartRate);
 
