@@ -21,6 +21,7 @@
 
 #include <QWidget>
 class QwtPlotCurve;
+class RideItem;
 
 #include "ui_WorkoutEditor.h"
 
@@ -35,17 +36,20 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     enum WorkoutTypeEnum { WT_ERG, WT_MRC, WT_CRS };
     WorkoutTypeEnum workoutType;
     QwtPlotCurve *workoutCurve;
+    RideItem *ride;
+    double startAltitude;
 
     // methods
     void setup();
     void update();
 
  public:
-    WorkoutEditor(QWidget *parent = NULL, int _ftp =0) :QWidget(parent)
+    WorkoutEditor(QWidget *parent, int _ftp, RideItem *_ride) :QWidget(parent)
     {
         useMetricUnits = false;
         workoutType = WT_ERG;
         ftp = _ftp;
+        ride = _ride;
         setupUi(this);
         setup();
     }
@@ -59,6 +63,7 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     void addRow();
     void insertRow();
     void deleteRow();
+    void import();
 };
 
 #endif // _GC_WORKOUTEDITOR_H

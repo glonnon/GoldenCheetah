@@ -26,6 +26,8 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+#include <RideItem.h>
+#include <Units.h>
 
 // setup: initializes the form
 void WorkoutEditor::setup()
@@ -56,8 +58,11 @@ void WorkoutEditor::setup()
     connect((QObject*)SaveCancelButtonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked()), this, SLOT(reset()));
 
     workoutCurve = new QwtPlotCurve("Watts");
-    workoutCurve->setBaseline(0);
 
+    // add import to the SaveCancelButtonBox
+    QPushButton *importButton = new QPushButton("Import");
+    SaveCancelButtonBox->addButton(importButton,QDialogButtonBox::ActionRole);
+    connect(importButton,SIGNAL(clicked()),this,SLOT(import()));
     update();
 }
 
@@ -134,18 +139,30 @@ void WorkoutEditor::saveWorkout()
     stream << "[COURSE DATA]" << endl;
     int numRows = workoutTable->rowCount();
     int row = 0;
+    stream.setRealNumberPrecision(2);
+    stream.setRealNumberNotation(QTextStream::FixedNotation);
+    double currentX = 0;
+    QString endStr = (workoutType == WT_MRC ? "%" : (workoutType == WT_CRS ? " 0" : ""));
     while(row < numRows)
     {
         QTableWidgetItem *colm1 = workoutTable->item(row,0);
         QTableWidgetItem *colm2 = workoutTable->item(row,1);
         if(colm1 && colm2)
         {
-            stream << colm1->text();
-            stream << " " << colm2->text();
-            if(workoutType == WT_MRC) stream << "%";
-            else if(workoutType == WT_CRS) stream << " 0";
-            stream << endl;
+            double x = colm1->text().toDouble();
+            double y = colm2->text().toDouble();
+            if(workoutType != WT_CRS)
+            {
+                // start point
+                stream << currentX << " ";
+                stream << y << endStr << endl;
+            }
+            currentX += x;
+            stream << currentX << " ";
+            stream << y << endStr << endl;
+
         }
+
         row++;
     }
     stream << "[END COURSE DATA]" << endl;
@@ -154,6 +171,7 @@ void WorkoutEditor::saveWorkout()
 void WorkoutEditor::reset()
 {
     workoutTable->clearContents();
+    workoutTable->setRowCount(2);
 }
 
 void WorkoutEditor::update()
@@ -181,6 +199,7 @@ void WorkoutEditor::update()
         colms.append("Watts");
 
     workoutTable->setHorizontalHeaderLabels(colms);
+    workoutTable->horizontalHeader()->setVisible(true);
 
     if(workoutType == WT_CRS)
     {
@@ -197,6 +216,7 @@ void WorkoutEditor::update()
     }
     else
     {
+        workoutCurve->setBaseline(0);
         workoutCurve->setStyle(QwtPlotCurve::Steps);
         workoutPlot->setAxisTitle(QwtPlot::yLeft,"Watts");
         workoutPlot->setAxisTitle(QwtPlot::xBottom,"Duration");
@@ -215,6 +235,9 @@ void WorkoutEditor::update()
     double currentX = 0;
     double currentElevation = 0;
     double totalClimbed = 0;
+
+    if(workoutType == WT_CRS)
+        currentElevation = startAltitude * (useMetricUnits ? 1 : 1/METERS_PER_FOOT);
 
     while(row < numRows)
     {
@@ -278,6 +301,113 @@ void WorkoutEditor::update()
        int BikeScore = TotalPowerTime/(ftp *60)* 100;
        this->bikeScoreLabel->setText(QString::number(BikeScore));
     }
+}
+
+void WorkoutEditor::import()
+{
+    double prevAlt = 0;
+    double alt = 0;
+    double prevDistance = 0;
+    double distance = 0;
+    double startSmoothTime = 0;
+    double smoothTime = 30;  // why 30 seconds...  I hate to have the load generator change every second...  30 sounded good...
+    double joules = 0;
+    double lastSec = 0;
+
+
+    std::vector<std::pair<double,double> > rideData;
+
+    // to make the ride smoother, let's average every 30 seconds...
+
+    foreach(RideFilePoint *rfp, ride->ride()->dataPoints())
+    {
+        if(prevDistance == 0)
+        {
+            startAltitude = rfp->alt;
+            prevDistance = rfp->km;
+            prevAlt = rfp->alt;
+            lastSec = startSmoothTime = rfp->secs;
+            continue;
+        }
+
+        if(rfp->secs - startSmoothTime < smoothTime)
+        {
+            joules += rfp->watts * (rfp->secs - lastSec); // kJoules accumulator
+            lastSec = rfp->secs;
+            continue;
+        }
+
+        if(workoutType == WT_CRS)
+        {
+            // find out the slope.
+            distance = rfp->km;
+            alt = rfp->alt;
+            double d = distance - prevDistance;
+            double a = alt - prevAlt;
+            double slope = a/(d *1000) * 100;  // slope is a percentage, need to convert to meters
+
+            prevAlt = alt;
+            prevDistance = distance;
+
+            if(d < 0.0001) continue; // throw out too small of samples
+            d = d / (useMetricUnits ? 1 : KM_PER_MILE);
+            // make the ride, ridable...  max slope -8..8
+            if(slope > 8) slope = 8;
+            if(slope < -8) slope = -8;
+
+            rideData.push_back(std::pair<double,double>(d,slope));
+
+        }
+        else
+        {
+            // use the smoothTime power avg.
+            double avgPower = joules / (rfp->secs - startSmoothTime);
+            double minutes = (rfp->secs - startSmoothTime) / 60;
+            joules = 0;
+
+            // make the ride, ridable... avgPower between ftp/2..2*ftp
+            if(avgPower < ftp/2)
+            {
+                avgPower = ftp/2; // half of FTP is the min amount of power
+
+            }
+
+            if(avgPower > 2 * ftp)
+            {
+                avgPower = 2 *ftp;
+            }
+
+            if(workoutType == WT_ERG)
+            {
+                rideData.push_back((std::pair<double,double>(minutes,avgPower)));
+            }
+            else
+            {
+                // TODO: figure out the zones stuff to get the rider's ftp during the ride...
+                double powerPercentage = avgPower / ftp * 100;
+                rideData.push_back((std::pair<double,double>(minutes,powerPercentage)));
+            }
+        }
+        startSmoothTime = rfp->secs;
+    }
+    disconnect(workoutTable,SIGNAL(cellChanged(int,int)),this,SLOT(cellChanged(int,int)));
+    int row = 0;
+    this->workoutTable->clearContents();
+    workoutTable->setRowCount(rideData.size());
+
+    for(std::vector<std::pair<double,double> >::const_iterator cur = rideData.begin();
+        cur != rideData.end();
+        ++cur)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem(QString::number(cur->first));
+        workoutTable->setItem(row,0,item);
+        item = new QTableWidgetItem(QString::number(cur->second));
+        workoutTable->setItem(row,1,item);
+        item = workoutTable->item(row,0);
+        row++;
+    }
+    connect(workoutTable,SIGNAL(cellChanged(int,int)),this,SLOT(cellChanged(int,int)));
+    update();
 }
 
 void WorkoutEditor::unitsChanged(QAbstractButton *button)

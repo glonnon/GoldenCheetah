@@ -151,10 +151,10 @@
   <widget class="QGroupBox" name="groupBox_3">
    <property name="geometry">
     <rect>
-     <x>340</x>
-     <y>50</y>
+     <x>350</x>
+     <y>40</y>
      <width>331</width>
-     <height>121</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="title">
@@ -164,9 +164,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
-      <width>191</width>
-      <height>91</height>
+      <y>20</y>
+      <width>201</width>
+      <height>127</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -174,48 +174,6 @@
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>FTP</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="avgPowerOrElevationLabel">
-       <property name="text">
-        <string>Average Power</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="bikeScoreOrDistance">
-       <property name="text">
-        <string>BikeScore</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLabel" name="bikeScoreLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLabel" name="avgPowerLabel">
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>kJoule</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QLabel" name="kJouleLabel">
-       <property name="text">
-        <string>0</string>
        </property>
       </widget>
      </item>
@@ -232,6 +190,48 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="bikeScoreOrDistance">
+       <property name="text">
+        <string>BikeScore</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="avgPowerOrElevationLabel">
+       <property name="text">
+        <string>Average Power</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="bikeScoreLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="avgPowerLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>kJoule</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="kJouleLabel">
+       <property name="text">
+        <string>0</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -240,7 +240,7 @@
     <rect>
      <x>0</x>
      <y>160</y>
-     <width>261</width>
+     <width>301</width>
      <height>261</height>
     </rect>
    </property>
@@ -252,7 +252,7 @@
      <rect>
       <x>9</x>
       <y>30</y>
-      <width>251</width>
+      <width>273</width>
       <height>221</height>
      </rect>
     </property>
@@ -329,14 +329,17 @@
   <widget class="QDialogButtonBox" name="SaveCancelButtonBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>10</x>
      <y>440</y>
-     <width>191</width>
+     <width>251</width>
      <height>27</height>
     </rect>
    </property>
    <property name="standardButtons">
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
+   </property>
+   <property name="centerButtons">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>
