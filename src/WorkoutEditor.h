@@ -64,6 +64,9 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     void insertRow();
     void deleteRow();
     void import();
+    void tablePopupClicked();
+    void insertLap();
+    void ftpChanged(int x);
 };
 
 #endif // _GC_WORKOUTEDITOR_H

@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>679</width>
-    <height>492</height>
+    <width>954</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -141,8 +141,8 @@
   <widget class="QwtPlot" name="workoutPlot">
    <property name="geometry">
     <rect>
-     <x>299</x>
-     <y>190</y>
+     <x>510</x>
+     <y>200</y>
      <width>361</width>
      <height>281</height>
     </rect>
@@ -240,7 +240,7 @@
     <rect>
      <x>0</x>
      <y>160</y>
-     <width>301</width>
+     <width>391</width>
      <height>261</height>
     </rect>
    </property>
@@ -250,9 +250,9 @@
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>9</x>
+      <x>0</x>
       <y>30</y>
-      <width>273</width>
+      <width>376</width>
       <height>221</height>
      </rect>
     </property>
@@ -313,6 +313,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="insertLapButton">
+           <property name="text">
+            <string>Lap</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="addRowButton">
            <property name="text">
             <string>Add</string>
@@ -351,24 +358,7 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>SaveCancelButtonBox</sender>
-   <signal>clicked(QAbstractButton*)</signal>
-   <receiver>workoutTable</receiver>
-   <slot>reset()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>38</x>
-     <y>400</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>59</x>
-     <y>347</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <buttongroups>
   <buttongroup name="WorkoutTypeButtonGroup"/>
   <buttongroup name="UnitButtonGroup"/>

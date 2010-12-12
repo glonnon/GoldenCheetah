@@ -51,6 +51,8 @@ void WorkoutEditor::setup()
     connect(addRowButton,SIGNAL(clicked()),this,SLOT(addRow()));
     connect(deleteRowButton,SIGNAL(clicked()),this,SLOT(deleteRow()));
     connect(insertRowButton,SIGNAL(clicked()),this,SLOT(insertRow()));
+    connect(insertLapButton,SIGNAL(clicked()),this,SLOT(insertLap()));
+    connect(workoutTable,SIGNAL(pressed),this,SLOT(tablePopupClicked));
 
     // on save/cancel/reset do the right thing...
     connect(SaveCancelButtonBox, SIGNAL(accepted()), this, SLOT(saveWorkout()));
@@ -64,6 +66,8 @@ void WorkoutEditor::setup()
     SaveCancelButtonBox->addButton(importButton,QDialogButtonBox::ActionRole);
     connect(importButton,SIGNAL(clicked()),this,SLOT(import()));
     update();
+
+    connect(ftpSpinBox,SIGNAL(valueChanged(int)),this,SLOT(ftpChanged(int)));
 }
 
 void WorkoutEditor::addRow()
@@ -82,10 +86,42 @@ void WorkoutEditor::deleteRow()
     update();
 }
 
+void WorkoutEditor::ftpChanged(int x)
+{
+    ftp = x;
+    update();
+}
+
+void WorkoutEditor::insertLap()
+{
+    workoutTable->insertRow(workoutTable->currentRow());
+    QTableWidgetItem *lapItem = new QTableWidgetItem();
+    lapItem->setText("LAP");
+    lapItem->setFlags(Qt::ItemIsEnabled);
+    workoutTable->setItem(workoutTable->currentRow(),0,lapItem);
+    lapItem = new QTableWidgetItem();
+    lapItem->setText("LAP");
+    lapItem->setFlags(Qt::ItemIsEnabled);
+    workoutTable->setItem(workoutTable->currentRow(),1,lapItem);
+}
+
 void WorkoutEditor::cellChanged(int row, int colm)
 {
     QTableWidgetItem *item = workoutTable->item(row,colm);
+
+    if(item->text().contains("LAP") || item->text() == "")
+    {
+        if(colm != 1)
+        {
+            item = workoutTable->item(row,1);
+            if(item == NULL)
+                item = new QTableWidgetItem();
+            item->setText("");
+        }
+    }
+
     double d = item->text().toDouble();
+
     if(workoutType == WT_CRS)
     {
         // make sure the computrainer has a reasonable slope
@@ -99,6 +135,17 @@ void WorkoutEditor::cellChanged(int row, int colm)
     update();
 }
 
+void WorkoutEditor::tablePopupClicked()
+{
+    QMenu *tablePopup = new QMenu(this);
+    tablePopup->addMenu("Row");
+     tablePopup->addMenu("Insert Row");
+     tablePopup->addMenu("Delete Row");
+     tablePopup->addMenu("Add Row");
+     tablePopup->addMenu("Insert Lap Marker");
+
+    tablePopup->exec(QCursor::pos());
+}
 
 void WorkoutEditor::saveWorkout()
 {
@@ -147,8 +194,15 @@ void WorkoutEditor::saveWorkout()
     {
         QTableWidgetItem *colm1 = workoutTable->item(row,0);
         QTableWidgetItem *colm2 = workoutTable->item(row,1);
+
         if(colm1 && colm2)
         {
+            if(colm1->text().contains("LAP"))
+            {
+                stream << "LAP" << endl;
+                row++;
+                continue;
+            }
             double x = colm1->text().toDouble();
             double y = colm2->text().toDouble();
             if(workoutType != WT_CRS)
