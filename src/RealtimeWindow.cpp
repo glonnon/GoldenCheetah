@@ -312,6 +312,8 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     displaySpeed = displayCadence = displayGradient = displayLoad = 0;
     avgPower= avgHeartRate= avgSpeed= avgCadence= avgLoad= 0;
 
+    rideFile = boost::shared_ptr<RideFile>(new RideFile(QDateTime::currentDateTime(),1));
+
     connect(gui_timer, SIGNAL(timeout()), this, SLOT(guiUpdate()));
     connect(disk_timer, SIGNAL(timeout()), this, SLOT(diskUpdate()));
     connect(stream_timer, SIGNAL(timeout()), this, SLOT(streamUpdate()));
@@ -415,7 +417,17 @@ void RealtimeWindow::Start()       // when start button is pressed
                 recordFileStream << "Minutes,Torq (N-m),Km/h,Watts,Km,Cadence,Hrate,ID,Altitude (m)\n";
                 disk_timer->start(SAMPLERATE);  // start screen
             }
+            // create a new rideFile
+            if(rideFile != NULL)
+            {
+               //rideFile->writeAsCsv();
+            }
+            rideFile = boost::shared_ptr<RideFile>(new RideFile(QDateTime::currentDateTime(),0));
+
+
         }
+
+
 
         // stream
         if (status & RT_STREAMING) {
@@ -561,8 +573,7 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     // Cadence, HR and Power needs to be rounded to 0 decimal places
     powerLCD->display(round(displayPower));
     displaySpeed *=(useMetricUnits ? 1.0 : MILES_PER_KM);
-    QString speedStr = QString::number(displaySpeed,'f', 1);
-    speedLCD->display(speedStr);
+    speedLCD->display(QString::number(displaySpeed,'f', 1));
     cadenceLCD->display(round(displayCadence));
     heartrateLCD->display(round(displayHeartRate));
     lapLCD->display(displayWorkoutLap+displayLap);
@@ -604,9 +615,7 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     }
 
     avgpowerLCD->display((int)avgPower);
-    avgSpeed *=(useMetricUnits ? 1.0 : MILES_PER_KM);
-    QString avgspeedStr = QString::number(avgSpeed,'f', 1);
-    avgspeedLCD->display(avgspeedStr);
+    avgspeedLCD->display(QString::number(avgSpeed *(useMetricUnits ? 1.0 : MILES_PER_KM) ,'f', 1));
     avgcadenceLCD->display((int)avgCadence);
     avgheartrateLCD->display((int)avgHeartRate);
     kjouleLCD->display(round(kjoules));
@@ -728,6 +737,20 @@ void RealtimeWindow::diskUpdate()
                         << "," << (displayLap + displayWorkoutLap)
                         << "," << Altitude
                         << "," << "\n";
+
+    rideFile->appendPoint(total_msecs/1000,displayCadence,displayHeartRate,displayDistance,displaySpeed,0,
+                          displayPower,Altitude,0,0,0,displayLap + displayWorkoutLap);
+    // calculate bike score, xpower
+    //RideMetric rm;
+    const RideMetricFactory &factory = RideMetricFactory::instance();
+    const RideMetric *rm = factory.rideMetric("skiba_xpower");
+
+    QStringList metrics;
+    metrics.append("skiba_xpower");
+    QHash<QString,RideMetricPtr> results;
+    results = rm->computeMetrics(&*rideFile,this->main->zones(),this->main->hrZones(),metrics);
+    bikescore = rm->value(true);
+
 }
 
 //----------------------------------------------------------------------

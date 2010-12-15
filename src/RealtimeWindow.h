@@ -124,6 +124,7 @@ class RealtimeWindow : public QWidget
 
         QFile *recordFile;      // where we record!
         ErgFile *ergFile;       // workout file
+        boost::shared_ptr<RideFile> rideFile;     // keeps track of the workout to figure out BikeScore
 
         long total_msecs,
              lap_msecs,
