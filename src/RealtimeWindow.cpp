@@ -422,7 +422,7 @@ void RealtimeWindow::Start()       // when start button is pressed
             {
                //rideFile->writeAsCsv();
             }
-            rideFile = boost::shared_ptr<RideFile>(new RideFile(QDateTime::currentDateTime(),0));
+            rideFile = boost::shared_ptr<RideFile>(new RideFile(QDateTime::currentDateTime(),1));
 
 
         }
@@ -746,10 +746,10 @@ void RealtimeWindow::diskUpdate()
     const RideMetric *rm = factory.rideMetric("skiba_xpower");
 
     QStringList metrics;
-    metrics.append("skiba_xpower");
+    metrics.append("skiba_bike_score");
     QHash<QString,RideMetricPtr> results;
     results = rm->computeMetrics(&*rideFile,this->main->zones(),this->main->hrZones(),metrics);
-    bikescore = rm->value(true);
+    bikescore = results["skiba_bike_score"]->value(true);
 
 }
 
