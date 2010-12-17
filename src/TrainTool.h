@@ -63,7 +63,7 @@ class TrainTool : public QWidget
         QTreeWidgetItem *allWorkouts;
         QTreeWidgetItem *workout;
         QSplitter   *trainSplitter;
-        QFileSystemWatcher *watcher;
+        boost::shared_ptr<QFileSystemWatcher> watcher;
 
         //QTreeWidget *serverTree;        // XXX commented out for this release
         //QTreeWidgetItem *allServers;    // XXX commented out for this release
