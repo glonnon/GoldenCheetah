@@ -115,7 +115,10 @@ namespace gm
             totalHR += rfp.hr;
             samples++;
         }
-        int HR() { return totalHR / samples; }
+        int HR() {
+            if(samples == 0) return 0;
+            return totalHR / samples;
+        }
         operator int() { return HR(); }
     };
 
@@ -415,67 +418,108 @@ string GoogleMapControl::CreateIntervalMarkers()
     oss.setf(ios::fixed,ios::floatfield);
 
     oss << "var marker;" << endl;
-    int currentInterval = 0;
+    int currentInterval = rideData.front().interval;
     std::vector<RideFilePoint> intervalPoints;
+
+    oss << "var blueIcon = new GIcon(G_DEFAULT_ICON);" << endl;
+    oss << "blueIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/blue/blank.png\"" << endl;
+    oss << "markerOptions = { icon:blueIcon };" << endl;
+    oss << "marker = new GMarker(new GLatLng(";
+    oss << rideData.front().lat << "," << rideData.front().lon << "),blueIcon);" << endl;
+    oss << "marker.bindInfoWindowHtml(\"<h3>Start</h3>\");" << endl;
+    oss << "map.addOverlay(marker);" << endl;
+
+
+
+    double distance = 0;
+    double avgSpeed = 0;
+    QTime time;
+    AvgHR avgHr;
+    AvgPower avgPower;
+    double altGained;
+
     BOOST_FOREACH(RideFilePoint rfp, rideData)
     {
         intervalPoints.push_back(rfp);
         if(currentInterval < rfp.interval)
         {
             // want to see avg power, avg speed, alt changes, avg hr
-            double distance = intervalPoints.back().km -
+            distance = intervalPoints.back().km -
                                intervalPoints.front().km ;
             distance = (useMetricUnits ? distance : distance * MILES_PER_KM);
 
             int secs = intervalPoints.back().secs -
                 intervalPoints.front().secs;
 
-            double avgSpeed = (distance/((double)secs)) * 3600;
+            avgSpeed = (distance/((double)secs)) * 3600;
 
-            QTime time;
+
             time = time.addSecs(secs);
 
-            AvgHR avgHr = for_each(intervalPoints.begin(),
+            avgHr = for_each(intervalPoints.begin(),
                                    intervalPoints.end(),
                                        AvgHR());
-            AvgPower avgPower = for_each(intervalPoints.begin(),
+            avgPower = for_each(intervalPoints.begin(),
                                          intervalPoints.end(),
                                          AvgPower());
 
-            int altGained =ceil(for_each(intervalPoints.begin(),
+            altGained =ceil(for_each(intervalPoints.begin(),
                                        intervalPoints.end(),
                                             AltGained()));
             altGained = ceil((useMetricUnits ? altGained :
                               altGained * FEET_PER_METER));
             oss.precision(6);
-            oss << "marker = new GMarker(new GLatLng( ";
-            oss<< rfp.lat << "," << rfp.lon << "));" << endl;
-            oss << "marker.bindInfoWindowHtml(" <<endl;
-            oss << "\"<p><h3>Lap: " << currentInterval << "</h3></p>" ;
-            oss.precision(1);
-            oss << "<p>Distance: " << distance << " "
-                << (useMetricUnits ? "KM" : "Miles") << "</p>" ;
-            oss << "<p>Time: " << time.toString().toStdString() << "</p>";
-            oss << "<p>Avg Speed</>: " << avgSpeed << " "
-                << (useMetricUnits ? tr("KPH") : tr("MPH")).toStdString()
-                << "</p>";
-            if(avgHr != 0) {
-                oss << "<p>Avg HR: " << avgHr << "</p>";
-            }
-            if(avgPower != 0)
-            {
-                oss << "<p>Avg Power: " << avgPower << " Watts</p>";
-            }
-            oss << "<p>Alt Gained: " << altGained << " "
-                << (useMetricUnits ? tr("Meters") : tr("Feet")).toStdString()
-                << "</p>";
-            oss << "\");" << endl;
-            oss << "map.addOverlay(marker);" << endl;
+            QString str = "Lap";
+
+            CreateMarker(oss,str,rfp,
+                         distance, time, avgSpeed, avgHr, avgPower, altGained,rfp.interval,useMetricUnits);
             currentInterval = rfp.interval;
             intervalPoints.clear();
         }
     }
+    oss.precision(6);
+
+    oss << "var redIcon = new GIcon(G_DEFAULT_ICON);" << endl;
+    oss << "redIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/red/blank.png\"" << endl;
+    oss << "markerOptions = { icon:redIcon };" << endl;
+    oss << "marker = new GMarker(new GLatLng(";
+    oss << rideData.back().lat << "," << rideData.back().lon << "),redIcon);" << endl;
+    oss << "marker.bindInfoWindowHtml(\"<h3>End</h3>\");" << endl;
+    oss << "map.addOverlay(marker);" << endl;
     return oss.str();
+}
+
+void GoogleMapControl::CreateMarker(ostringstream &oss, QString &label,RideFilePoint &rfp,double distance, QTime &time, double avgSpeed,
+                                       double avgHr, double avgPower, double altGained, int interval, bool useMetricUnits)
+{
+    oss.precision(6);
+    oss << "intervalIcon = new GIcon(G_DEFAULT_ICON);" << endl;
+    oss << "intervalIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/green/marker" << interval << ".png\"" << endl;
+    oss << "markerOptions = { icon:intervalIcon };" << endl;
+    oss << "marker = new GMarker(new GLatLng( ";
+    oss<< rfp.lat << "," << rfp.lon << "),intervalIcon);" << endl;
+    oss << "marker.bindInfoWindowHtml(" <<endl;
+    oss << "\"<p><h3>" << label.toStdString() << ": " << interval << "</h3></p>" ;
+    oss.precision(1);
+    oss << "<p>Distance: " << distance << " "
+        << (useMetricUnits ? "KM" : "Miles") << "</p>" ;
+    oss << "<p>Time: " << time.toString().toStdString() << "</p>";
+    oss << "<p>Avg Speed</>: " << avgSpeed << " "
+        << (useMetricUnits ? tr("KPH") : tr("MPH")).toStdString()
+        << "</p>";
+    if(avgHr != 0) {
+        oss << "<p>Avg HR: " << avgHr << "</p>";
+    }
+    if(avgPower != 0)
+    {
+        oss << "<p>Avg Power: " << avgPower << " Watts</p>";
+    }
+    oss << "<p>Alt Gained: " << altGained << " "
+        << (useMetricUnits ? tr("Meters") : tr("Feet")).toStdString()
+        << "</p>";
+    oss << "\");" << endl;
+    oss << "map.addOverlay(marker);" << endl;
+
 }
 
 string GoogleMapControl::CreateMapToolTipJavaScript()

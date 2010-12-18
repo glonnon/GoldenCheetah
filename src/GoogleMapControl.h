@@ -53,6 +53,8 @@ Q_OBJECT
     std::string CreateMapToolTipJavaScript();
     std::string CreateIntervalMarkers();
     void loadRide();
+    void CreateMarker(std::ostringstream &oss, QString &label, RideFilePoint &rfp, double distance, QTime &time,
+                        double avgSpeed, double avgHr, double avgPower, double altGained, int interval,bool useMetricUnit);
     // the web browser is loading a page, do NOT start another load
     bool loadingPage;
     // the ride has changed, load a new page
