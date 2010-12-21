@@ -422,7 +422,7 @@ string GoogleMapControl::CreateIntervalMarkers()
     std::vector<RideFilePoint> intervalPoints;
 
     oss << "var blueIcon = new GIcon(G_DEFAULT_ICON);" << endl;
-    oss << "blueIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/blue/blank.png\"" << endl;
+    oss << "blueIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/green/blank.png\"" << endl;
     oss << "markerOptions = { icon:blueIcon };" << endl;
     oss << "marker = new GMarker(new GLatLng(";
     oss << rideData.front().lat << "," << rideData.front().lon << "),blueIcon);" << endl;
@@ -494,7 +494,7 @@ void GoogleMapControl::CreateMarker(ostringstream &oss, QString &label,RideFileP
 {
     oss.precision(6);
     oss << "intervalIcon = new GIcon(G_DEFAULT_ICON);" << endl;
-    oss << "intervalIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/green/marker" << interval << ".png\"" << endl;
+    oss << "intervalIcon.image = \"http://gmaps-samples.googlecode.com/svn/trunk/markers/blue/marker" << interval << ".png\"" << endl;
     oss << "markerOptions = { icon:intervalIcon };" << endl;
     oss << "marker = new GMarker(new GLatLng( ";
     oss<< rfp.lat << "," << rfp.lon << "),intervalIcon);" << endl;
