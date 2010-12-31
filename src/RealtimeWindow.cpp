@@ -583,7 +583,7 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     else loadLCD->display(round(displayGradient*10)/10.00);
 
     // distance
-    distanceLCD->display(round(displayDistance*(useMetricUnits ? 1.0 : MILES_PER_KM) *10.00) /10.00);
+    distanceLCD->display(QString::number(displayDistance*(useMetricUnits ? 1.0 : MILES_PER_KM),'f',1));
 
     // NZ Averages.....
     if (displayPower) { //NZAP is bogus - make it configurable!!!
@@ -615,10 +615,12 @@ void RealtimeWindow::guiUpdate()           // refreshes the telemetry
     }
 
     avgpowerLCD->display((int)avgPower);
-    avgspeedLCD->display(QString::number(avgSpeed *(useMetricUnits ? 1.0 : MILES_PER_KM) ,'f', 1));
+    avgspeedLCD->display(QString::number(avgSpeed,'f', 1));
+
     avgcadenceLCD->display((int)avgCadence);
     avgheartrateLCD->display((int)avgHeartRate);
     kjouleLCD->display(round(kjoules));
+    bikescoreLCD->display(round(bikescore));
 
     // now that plot....
     rtPlot->pwrData.addData(displayPower); // add new data point
@@ -750,7 +752,6 @@ void RealtimeWindow::diskUpdate()
     QHash<QString,RideMetricPtr> results;
     results = rm->computeMetrics(&*rideFile,this->main->zones(),this->main->hrZones(),metrics);
     bikescore = results["skiba_bike_score"]->value(true);
-
 }
 
 //----------------------------------------------------------------------
