@@ -69,4 +69,126 @@ class WorkoutEditor : public QWidget, public Ui::WorkoutEditor
     void ftpChanged(int x);
 };
 
+class Workout
+{
+public:
+    double ftp;
+    std::vector<std::pair<double,double> > Data;
+};
+
+#include <QWizard>
+#include <QRadioButton>
+#include <QButtonGroup>
+
+class RowValidator
+{
+public:
+    bool Validate(QVector<QTableWidgetItem> row);
+};
+
+class WorkoutEditor2 : public QTableWidget
+{
+    RowValidator *rv;
+public:
+    WorkoutEditor2(QStringList &colms, RowValidator *rv_ = NULL)
+    {
+        setHorizontalHeaderLabels(colms);
+        setColumnCount(colms.count());
+        horizontalHeader()->setVisible(true);
+        setShowGrid(true);
+
+    }
+
+
+};
+
+class WorkoutGraph
+{
+
+
+};
+
+class WorkoutTypePage : public QWizardPage
+{
+     Q_OBJECT
+
+    QButtonGroup *buttonGroupBox;
+    QRadioButton *absWattageRadioButton, *relWattageRadioButton, *gradientRadioButton, *importRadioButton;
+public:
+    WorkoutTypePage(QWidget *parent = NULL);
+    int nextId() const;
+   bool isComplete() const { return true; }
+};
+class AbsWattagePage : public QWizardPage
+{
+ Q_OBJECT
+    WorkoutEditor2 *we;
+public:
+    AbsWattagePage(QWidget *parent = NULL) : QWizardPage(parent)
+    {
+        setTitle("Workout Wizard");
+        setSubTitle("Absolute Wattage Workout Creator");
+        QLayout *layout = new QVBoxLayout();
+        QStringList colms;
+        colms.append(tr("Minutes"));
+        colms.append(tr("Wattage"));
+        we = new WorkoutEditor2(colms);
+        layout->addWidget(we);
+        this->setLayout(layout);
+    }
+       bool isFinalPage() const { return true; }
+};
+class RelWattagePage : public QWizardPage
+{
+ Q_OBJECT
+public:
+    RelWattagePage() {
+        setTitle("Workout Wizard");
+        setSubTitle("% of FTP Workout Creator");
+    }
+    bool isFinalPage() const { return true; }
+    bool nextId()  { return -1; }
+};
+class GradientPage : public QWizardPage
+{
+     Q_OBJECT
+public:
+    GradientPage()
+    {
+        setTitle("Workout Wizard");
+        setSubTitle("Manually crate a workout based on gradient (slope) and distance");
+    }
+    bool isFinalPage() const { return true; }
+};
+
+class ImportPage : public QWizardPage
+{
+    Q_OBJECT
+public:
+    ImportPage()
+    {
+        setTitle("Workout Wizard");
+        setSubTitle("Import current ride as a Gradient Ride (slope based)");
+        setFinalPage(true);
+    }
+    bool isFinalPage() const { return true; }
+};
+
+
+#include <QWizard>
+
+class WorkoutWizard : public QWizard
+{
+        Q_OBJECT
+public:
+    enum { WW_WorkoutTypePage, WW_AbsWattagePage, WW_RelWattagePage, WW_GradientPage, WW_ImportPage };
+
+    WorkoutWizard(QWidget *parent = NULL);
+
+    // called at the end of the wizard...
+    void accept();
+};
+
+
+
 #endif // _GC_WORKOUTEDITOR_H

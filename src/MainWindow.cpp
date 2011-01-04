@@ -597,7 +597,7 @@ MainWindow::MainWindow(const QDir &home) :
                            SLOT(showOptions()), tr("Ctrl+O"));
     optionsMenu->addAction(tr("Critical Power Calculator..."), this,
                            SLOT(showTools()));
-    optionsMenu->addAction(tr("Workout Editor"), this,
+    optionsMenu->addAction(tr("Workout Creator"), this,
                            SLOT(showWorkoutEditor()));
 
 #ifdef GC_HAVE_ICAL
@@ -1643,8 +1643,9 @@ void MainWindow::showTools()
 void MainWindow::showWorkoutEditor()
 {
    int ftp = zones_->getCP(zones_->whichRange(QDate::currentDate()));
-   WorkoutEditor *we = new WorkoutEditor(NULL,ftp,this->ride);
-   we->show();
+   WorkoutWizard *ww = new WorkoutWizard(this);
+   ww->show();
+
 }
 
 void

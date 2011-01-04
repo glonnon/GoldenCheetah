@@ -28,10 +28,71 @@
 #include <qwt_plot_curve.h>
 #include <RideItem.h>
 #include <Units.h>
+#include <QTableWidget>
+
+
+
+WorkoutTypePage::WorkoutTypePage(QWidget *parent) : QWizardPage(parent)
+{
+    setTitle(tr("Workout Creator"));
+    setSubTitle(tr("Select the workout type to be created"));
+    buttonGroupBox = new QButtonGroup(this);
+    absWattageRadioButton = new QRadioButton(tr("Absolute Wattage"));
+    absWattageRadioButton->click();
+    relWattageRadioButton = new QRadioButton(tr("% FTP Wattage"));
+    gradientRadioButton = new QRadioButton(tr("Gradient"));
+    importRadioButton = new QRadioButton(tr("Import Current Ride"));
+    QVBoxLayout *groupBoxLayout = new QVBoxLayout();
+
+    groupBoxLayout->addWidget(absWattageRadioButton);
+    groupBoxLayout->addWidget(relWattageRadioButton);
+    groupBoxLayout->addWidget(gradientRadioButton);
+    groupBoxLayout->addWidget(importRadioButton);
+    registerField("absWattage",absWattageRadioButton);
+    registerField("relWattage",relWattageRadioButton);
+    registerField("gradientWattage",gradientRadioButton);
+    registerField("import",importRadioButton);
+    setLayout(groupBoxLayout);
+}
+
+int WorkoutTypePage::nextId() const
+{
+    if(absWattageRadioButton->isChecked())
+        return WorkoutWizard::WW_AbsWattagePage;
+    else if (relWattageRadioButton->isChecked())
+        return WorkoutWizard::WW_RelWattagePage;
+    else if (gradientRadioButton->isChecked())
+        return WorkoutWizard::WW_GradientPage;
+    else if (importRadioButton->isChecked())
+        return WorkoutWizard::WW_ImportPage;
+    return WorkoutWizard::WW_AbsWattagePage;
+}
+
+
+#include <QWizard>
+
+WorkoutWizard::WorkoutWizard(QWidget *parent) :QWizard(parent)
+{
+    setPage(WW_WorkoutTypePage, new WorkoutTypePage());
+    setPage(WW_AbsWattagePage, new AbsWattagePage());
+    setPage(WW_RelWattagePage, new RelWattagePage());
+    setPage(WW_GradientPage, new GradientPage());
+    setPage(WW_ImportPage, new ImportPage());
+    this->setStartId(WW_WorkoutTypePage);
+}
+// called at the end of the wizard...
+void WorkoutWizard::accept()
+{
+
+
+}
+
 
 // setup: initializes the form
 void WorkoutEditor::setup()
 {
+    WorkoutWizard ww;
+    ww.show();
     // set the ftp to be the current riders FTP
     ftpSpinBox->setValue(ftp);
 
@@ -139,10 +200,10 @@ void WorkoutEditor::tablePopupClicked()
 {
     QMenu *tablePopup = new QMenu(this);
     tablePopup->addMenu("Row");
-     tablePopup->addMenu("Insert Row");
-     tablePopup->addMenu("Delete Row");
-     tablePopup->addMenu("Add Row");
-     tablePopup->addMenu("Insert Lap Marker");
+    tablePopup->addMenu("Insert Row");
+    tablePopup->addMenu("Delete Row");
+    tablePopup->addMenu("Add Row");
+    tablePopup->addMenu("Insert Lap Marker");
 
     tablePopup->exec(QCursor::pos());
 }
@@ -154,7 +215,7 @@ void WorkoutEditor::saveWorkout()
     QVariant workoutDir = settings->value(GC_WORKOUTDIR);
 
     QString filename = QFileDialog::getSaveFileName(this,QString("Save Workout"),
-                                 workoutDir.toString(),"Computrainer Format *.erg *.crs *.mrc");
+                                                    workoutDir.toString(),"Computrainer Format *.erg *.crs *.mrc");
     // open the file
     QFile f(filename);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -259,13 +320,13 @@ void WorkoutEditor::update()
     {
         workoutCurve->setStyle(QwtPlotCurve::Lines);
         if(!useMetricUnits) {
-              workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (feet)");
-              workoutPlot->setAxisTitle(QwtPlot::xBottom,"Miles");
+            workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (feet)");
+            workoutPlot->setAxisTitle(QwtPlot::xBottom,"Miles");
         }
         else
         {
-              workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (meters)");
-              workoutPlot->setAxisTitle(QwtPlot::xBottom,"KM");
+            workoutPlot->setAxisTitle(QwtPlot::yLeft,"Elevation (meters)");
+            workoutPlot->setAxisTitle(QwtPlot::xBottom,"KM");
         }
     }
     else
@@ -349,11 +410,11 @@ void WorkoutEditor::update()
     }
     else
     {
-       this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
-       this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
-       // BikeScore is easy...  We don't have to do the xPower, because power is constant
-       int BikeScore = TotalPowerTime/(ftp *60)* 100;
-       this->bikeScoreLabel->setText(QString::number(BikeScore));
+        this->avgPowerLabel->setText(QString::number(TotalPowerTime/TotalTime,'f',2));
+        this->kJouleLabel->setText(QString::number(TotalPowerTime * 60 /1000,'f',2));
+        // BikeScore is easy...  We don't have to do the xPower, because power is constant
+        int BikeScore = TotalPowerTime/(ftp *60)* 100;
+        this->bikeScoreLabel->setText(QString::number(BikeScore));
     }
 }
 
@@ -450,8 +511,8 @@ void WorkoutEditor::import()
     workoutTable->setRowCount(rideData.size());
 
     for(std::vector<std::pair<double,double> >::const_iterator cur = rideData.begin();
-        cur != rideData.end();
-        ++cur)
+    cur != rideData.end();
+    ++cur)
     {
         QTableWidgetItem *item = new QTableWidgetItem(QString::number(cur->first));
         workoutTable->setItem(row,0,item);
@@ -493,3 +554,6 @@ void WorkoutEditor::workoutTypeChanged(QAbstractButton *button)
         update();
     }
 }
+
+#include <QWizardPage>
+
