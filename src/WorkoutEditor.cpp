@@ -30,6 +30,8 @@
 #include <Units.h>
 #include <QTableWidget>
 
+#include "Settings.h"
+
 
 
 WorkoutTypePage::WorkoutTypePage(QWidget *parent) : QWizardPage(parent)
@@ -211,8 +213,7 @@ void WorkoutEditor::tablePopupClicked()
 void WorkoutEditor::saveWorkout()
 {
     // get the filename
-    boost::shared_ptr<QSettings> settings = GetApplicationSettings();
-    QVariant workoutDir = settings->value(GC_WORKOUTDIR);
+    QVariant workoutDir ;//= appsettings->value(QString(GC_WORKOUTDIR));
 
     QString filename = QFileDialog::getSaveFileName(this,QString("Save Workout"),
                                                     workoutDir.toString(),"Computrainer Format *.erg *.crs *.mrc");
