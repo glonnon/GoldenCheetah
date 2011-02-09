@@ -90,9 +90,12 @@ class TrainTool : public QWidget
         QTreeWidgetItem *workout;
         QSplitter   *trainSplitter;
         QTreeWidget *serverTree;
-        QTreeWidgetItem *allServers;
+        QTreeWidgetItem *allServers;       
         QTreeWidgetItem *allDevices;
         QTreeWidgetItem *server;
+
+        boost::shared_ptr<QFileSystemWatcher> watcher;
+
 
         // those buttons
         QFrame *buttonPanel;
