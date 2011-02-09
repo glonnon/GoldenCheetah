@@ -136,6 +136,9 @@ class RealtimeWindow : public GcWindow
              load_msecs;
         QTime load_period;
 
+        bool manualOverride;  // during a erg workout, if the Higher/Lower signals are called
+                              // switch to manual override until the next lap.
+
         uint session_elapsed_msec, lap_elapsed_msec;
         QTime session_time, lap_time;
 
