@@ -76,6 +76,8 @@ RealtimeWindow::RealtimeWindow(MainWindow *parent, TrainTool *trainTool, const Q
     streamController = NULL;
     ergFile = NULL;
 
+    manualOverride = false;
+
     // metric or imperial?
     QVariant unit = appsettings->value(this, GC_UNIT);
     useMetricUnits = (unit.toString() == "Metric");
@@ -520,6 +522,7 @@ void RealtimeWindow::Stop(int deviceStatus)        // when stop button is presse
     hrcount = 0;
     spdcount = 0;
     lodcount = 0;
+    manualOverride = false;
     displayWorkoutLap = displayLap =0;
     session_elapsed_msec = 0;
     session_time.restart();
@@ -851,28 +854,50 @@ void RealtimeWindow::loadUpdate()
     long load;
     double gradient;
     load_msecs += LOADRATE;
+    int curLap;
 
     if (deviceController == NULL) return;
 
     if (status&RT_MODE_ERGO) {
-        load = ergFile->wattsAt(load_msecs, displayWorkoutLap);
+
+        load = ergFile->wattsAt(load_msecs, curLap);
+
+        if(displayWorkoutLap != curLap)
+        {
+            // we are onto a new lap/interval, reset the override
+            manualOverride = false;
+        }
+        if(!manualOverride)
+        {
+            displayLoad = load;
+        }
+        displayWorkoutLap = curLap;
 
         // we got to the end!
         if (load == -100) {
             Stop(DEVICE_OK);
         } else {
-            displayLoad = load;
             deviceController->setLoad(displayLoad);
             ergPlot->setNow(load_msecs);
         }
     } else {
         gradient = ergFile->gradientAt(displayWorkoutDistance*1000, displayWorkoutLap);
 
+        if(displayWorkoutLap != curLap)
+        {
+            // we are onto a new lap/interval, reset the override
+            manualOverride = false;
+        }
+        if(!manualOverride)
+        {
+            displayGradient = gradient;
+        }
+        displayWorkoutLap = curLap;
+
         // we got to the end!
         if (gradient == -100) {
             Stop(DEVICE_OK);
         } else {
-            displayGradient = gradient;
             deviceController->setGradient(displayGradient);
             ergPlot->setNow(displayWorkoutDistance * 1000); // now is in meters we keep it in kilometers
         }
@@ -916,6 +941,7 @@ void RealtimeWindow::Higher()
 {
     if (deviceController == NULL) return;
 
+    manualOverride = true;
     if (status&RT_MODE_ERGO) displayLoad += 5;
     else displayGradient += 0.1;
 
@@ -931,6 +957,7 @@ void RealtimeWindow::Lower()
 {
     if (deviceController == NULL) return;
 
+    manualOverride = true;
     if (status&RT_MODE_ERGO) displayLoad -= 5;
     else displayGradient -= 0.1;
 
