@@ -1,1 +1,5 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/ride">
+        <file alias="test">html/ltm-summary.html</file>
+    </qresource>
+</RCC>
