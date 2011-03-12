@@ -69,7 +69,9 @@ class RealtimeWindow : public GcWindow
         void newLap();                      // start new Lap!
         void nextDisplayMode();     // show next display mode
         void setDeviceController();     // based upon selected device
+        RealtimeController *getDeviceController() { return deviceController; }
         void setStreamController();     // based upon selected device
+
 
     public slots:
 

@@ -437,3 +437,11 @@ TRANSLATIONS = translations/gc_fr.ts \
                translations/gc_cs.ts \
                translations/gc_ru.ts
 
+HEADERS += \
+    RideWindow.h
+
+SOURCES += \
+    RideWindow.cpp
+
+RESOURCES += \
+    RideWindow.qrc

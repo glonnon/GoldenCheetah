@@ -19,6 +19,7 @@
 #include "TrainTabs.h"
 #include "TrainTool.h"
 #include "RealtimeWindow.h"
+#include "RideWindow.h"
 
 TrainTabs::TrainTabs(MainWindow *parent, TrainTool *trainTool, const QDir &home) :
 trainTool(trainTool), home(home), main(parent)
@@ -26,4 +27,8 @@ trainTool(trainTool), home(home), main(parent)
     setContentsMargins(0,0,0,0);
     realtimeWindow = new RealtimeWindow(parent, trainTool, home);
     addTab(realtimeWindow, tr("Solo Ride"));
+
+    RideWindow * rideWindow = new RideWindow(parent,trainTool,home,realtimeWindow);
+    addTab(rideWindow, tr("Ride View"));
+
 };
