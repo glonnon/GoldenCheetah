@@ -1,11 +1,13 @@
 #include "RideWindow.h"
-
+#include "RideFile.h"
 #include "RealtimeData.h"
 
-
-class RideData : QObject
+/// The rider class holds all the information needed to display the rider
+/// on the web page
+class Rider : QObject
 {
-private:
+protected:
+    QString name;
     long time;
     double hr;
     double watts;
@@ -14,9 +16,14 @@ private:
     double load;
     double wheelRpm;
     double distance;
+    double lon;
+    double lat;
+
+    // current ride file.
+    RideFile *rideFile;
 
 public:
-    RideData() {}
+    Rider() {}
 
     Q_PROPERTY(long Time READ getTime WRITE setTime);
     long getTime() { return time;}
@@ -50,21 +57,74 @@ public:
     double getDistance() { return distance; }
     void setDistance(double d) { distance = d;}
 
-    static RideData * Create(RealtimeData &data)
+    virtual void Update(RealtimeData &data)
     {
-        RideData *rd = new RideData();
-        rd->setTime(data.getTime());
-        rd->setHr(data.getHr());
-        rd->setWatts(data.getWatts());
-        rd->setSpeed(data.getSpeed());
-        rd->setCadence(data.getCadence());
-        rd->setLoad(data.getLoad());
-        return rd;
+        time = data.getTime();
+        hr = data.getHr();
+        watts = data.getWatts();
+        speed = data.getSpeed();
+        cadence = data.getCadence();
+        load = data.getLoad();
+
+        // simple model...  just use speed...
+        // a better model is to use a physical model... rolling resistance, frontal area, grade, headwind, temp, elevation, etc...
+        //
+        // calculate distance
+        distance = time * speed / 3600;
+
+        // find the nearest lng/lat
+        RideFilePoint *rfp;
+
+        foreach(rfp, rideFile->dataPoints())
+        {
+            if(rfp->km > distance)
+            {
+                lon = rfp->lon;
+                lat = rfp->lat;
+            }
+
+        }
+    }
+
+    // signal the webpage to update...
+    void UpdateWebPage()
+    {}
+
+};
+
+/// rides at a particular wattage
+class Pacer : Rider
+{
+public:
+    void setLoad(double l) { load = l;}
+
+    virtual void Update(RealtimeData &data)
+    {
+        // use the load to figure out where the rider location
+
+    }
+
+
+};
+
+
+/// rides the rideFile exactly
+class GhostRider : Rider
+{
+public:
+    virtual void Update(RealtimeData &data)
+    {
+        // use time to find the rider location
+
     }
 };
 
+// This object stores the calculated rider metrics
+// such as xpower, bike score, avg power, kjoules
 class RideMetrics
 {
+protected:
+
 public:
     RideMetrics(RealtimeWindow *window) {}
 
