@@ -445,3 +445,8 @@ SOURCES += \
 
 RESOURCES += \
     RideWindow.qrc
+
+OTHER_FILES +=
+
+OTHER_FILES += \
+    RideWindow.html

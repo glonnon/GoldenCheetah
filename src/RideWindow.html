@@ -1,0 +1,23 @@
+<html>
+<head>
+<script type="text/javascript">
+function timeMsg()
+{
+var t=setTimeout("RiderTimer()",1000);
+}
+function RiderTimer()
+{
+    var lon = Rider.getLon();
+    var lat = Rider.getLat();
+    document.getElementById("riderGpsLocation").innerHtml("this is the gps coordinates" + lon + " " + lat);
+}
+</script>
+</head>
+
+<body>
+<div id="riderGpsLocation">
+
+</div>
+</body>
+</html>
+

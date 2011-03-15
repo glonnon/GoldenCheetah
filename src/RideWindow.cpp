@@ -1,10 +1,16 @@
+#include <QWebPage>
+#include <QWebFrame>
+
+
 #include "RideWindow.h"
 #include "RideFile.h"
 #include "RealtimeData.h"
 
+
+
 /// The rider class holds all the information needed to display the rider
 /// on the web page
-class Rider : QObject
+class Rider : public QObject
 {
 protected:
     QString name;
@@ -57,6 +63,14 @@ public:
     double getDistance() { return distance; }
     void setDistance(double d) { distance = d;}
 
+    Q_PROPERTY(double distance READ getDistance WRITE setDistance);
+    double getLon() { return lon; }
+    void setLon(double l) { lon = l;}
+
+    Q_PROPERTY(double lat READ getLat WRITE setLat);
+    double getLat() { return lat; }
+    void setLat(double l) { lat = l;}
+
     virtual void Update(RealtimeData &data)
     {
         time = data.getTime();
@@ -103,8 +117,6 @@ public:
         // use the load to figure out where the rider location
 
     }
-
-
 };
 
 
@@ -141,5 +153,18 @@ RideWindow::RideWindow(MainWindow * parent, TrainTool *_trainTool, const QDir &d
     QVBoxLayout *layout = new QVBoxLayout();
     layout->addWidget(view);
     setLayout(layout);
+    QWebPage *page = view->page();
+    QWebFrame *frame = page->mainFrame();
+
+    Rider *rider = new Rider();
+    // load the ridewindow page
+    frame->load(QUrl(QString("qrc:/ride/RideWindow.html")));
+
+    // put the object into the frame
+    frame->addToJavaScriptWindowObject("Rider",rider);
+
+
+
+
 
 }
