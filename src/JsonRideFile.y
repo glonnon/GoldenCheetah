@@ -275,6 +275,8 @@ JsonFileReader::writeRideFile(const RideFile *ride, QFile &file) const
 
     // setup streamer
     QTextStream out(&file);
+    out.setRealNumberNotation(QTextStream::FixedNotation);
+    out.setRealNumberPrecision(12);
 
     // start of document and ride
     out << "{\n\t\"RIDE\":{\n";
@@ -391,10 +393,12 @@ JsonFileReader::writeRideFile(const RideFile *ride, QFile &file) const
             if (ride->areDataPresent()->kph) out << ", \"KPH\":" << QString("%1").arg(p->kph);
             if (ride->areDataPresent()->hr) out << ", \"HR\":"  << QString("%1").arg(p->hr);
             if (ride->areDataPresent()->alt) out << ", \"ALT\":" << QString("%1").arg(p->alt);
+
             if (ride->areDataPresent()->lat)
-                out << ", \"LAT\":" << QString("%1").arg(p->lat, 0, 'g', 6);
+                out << ", \"LAT\":" << QString("%1").arg(p->lat, 0, 'g', 12);
             if (ride->areDataPresent()->lon)
-                out << ", \"LON\":" << QString("%1").arg(p->lon, 0, 'g', 6);
+                out << ", \"LON\":" << QString("%1").arg(p->lon, 0, 'g', 12);
+
             if (ride->areDataPresent()->headwind) out << ", \"HEADWIND\":" << QString("%1").arg(p->headwind);
 
             // sample points in here!
