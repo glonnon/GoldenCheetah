@@ -4,19 +4,23 @@
 function timeMsg()
 {
 var t=setTimeout("RiderTimer()",1000);
+console.log("set timer");
 }
 function RiderTimer()
 {
-    var lon = Rider.getLon();
-    var lat = Rider.getLat();
+    console.log("rider timer");
+    var lon = Rider.lon;
+    var lat = Rider.lat;
     document.getElementById("riderGpsLocation").innerHtml("this is the gps coordinates" + lon + " " + lat);
+    document.write("timer is going off");
 }
 </script>
 </head>
 
 <body>
+Theis is there
 <div id="riderGpsLocation">
-
+This is here
 </div>
 </body>
 </html>
