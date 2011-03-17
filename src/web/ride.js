@@ -67,7 +67,8 @@ function streetUpdate(prevSample,curSample)
 
 function metricsUpdate(sampleIndex)
 {
-
+    var curSample = ride.RIDE.SAMPLES[sampleIndex];
+    var html = "<p>Watts: " + curSample.WATTS
 }
 
 // time between updates
@@ -80,11 +81,12 @@ var mapRate = period;
 // event loop drives the animation
 function animateLoop()
 {
+    var done = false;
     var sampleIndex = sampleInterval * eventCount;
     if(sampleIndex >= ride.RIDE.SAMPLES.length)
     {
-        // done with the animate
-        return;
+        sampleIndex = ride.RIDE.SAMPLES.length;
+        done = true;
     }
     prevSample = curSample;
     curSample = ride.RIDE.SAMPLES[sampleIndex];
@@ -102,7 +104,11 @@ function animateLoop()
         metricsUpdate(sampleIndex);
     }
     eventCount = eventCount +1;
-    setTimeout("animateLoop()",period);
+
+    if(done != true)
+    {
+        setTimeout("animateLoop()",period);
+    }
 }
 curSample = ride.RIDE.SAMPLES[0];
 
