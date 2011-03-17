@@ -61,14 +61,18 @@ function streetUpdate(prevSample,curSample)
     var h = google.maps.geometry.spherical.computeHeading(prevLatLng,curLatLng);
     street.setPov({ heading: h, pitch: 10, zoom: 1 });
     street.setPosition(curLatLng);
-    console.log("heading " + h);
     street.setVisible(true);
 }
 
 function metricsUpdate(sampleIndex)
 {
     var curSample = ride.RIDE.SAMPLES[sampleIndex];
-    var html = "<p>Watts: " + curSample.WATTS
+    var html = "<p>Watts: " + curSample.WATTS + "</p>";
+    html = html +  "<p>Cadence: " + curSample.CAD + "</p>";
+    html = html +  "<p>Heart Rate: " + curSample.HR + "</p>";
+    html = html +  "<p>Speed: " + curSample.KPH + "</p>";
+    html = html +  "<p>Alt: " + curSample.ALT + "</p>";
+    document.getElementById('ridedata').innerHTML = html;
 }
 
 // time between updates
@@ -76,7 +80,7 @@ var eventCount = 0;
 var period = 500;
 var sampleInterval = 30;
 var streetRate = 2000;
-var metricsRate = 1000;
+var metricsRate = period;
 var mapRate = period;
 // event loop drives the animation
 function animateLoop()
@@ -85,7 +89,7 @@ function animateLoop()
     var sampleIndex = sampleInterval * eventCount;
     if(sampleIndex >= ride.RIDE.SAMPLES.length)
     {
-        sampleIndex = ride.RIDE.SAMPLES.length;
+        sampleIndex = ride.RIDE.SAMPLES.length -1;
         done = true;
     }
     prevSample = curSample;
