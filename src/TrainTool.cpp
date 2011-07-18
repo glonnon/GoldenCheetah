@@ -171,6 +171,7 @@ TrainTool::TrainTool(MainWindow *parent, const QDir &home) : QWidget(parent), ho
     load_msecs = total_msecs = lap_msecs = 0;
     displayWorkoutDistance = displayDistance = displayPower = displayHeartRate =
     displaySpeed = displayCadence = displayGradient = displayLoad = 0;
+    manualOverride = false;
 
     rideFile = boost::shared_ptr<RideFile>(new RideFile(QDateTime::currentDateTime(),1));
 
@@ -609,6 +610,7 @@ void TrainTool::Stop(int deviceStatus)        // when stop button is pressed
     hrcount = 0;
     spdcount = 0;
     lodcount = 0;
+    manualOverride = false;
     displayWorkoutLap = displayLap =0;
     session_elapsed_msec = 0;
     session_time.restart();
@@ -800,6 +802,7 @@ void TrainTool::metricsUpdate()
 
 void TrainTool::loadUpdate()
 {
+    int curLap;
     long load;
     double gradient;
     // the period between loadUpdate calls is not constant, and not exactly LOADRATE,
@@ -809,7 +812,18 @@ void TrainTool::loadUpdate()
     if (deviceController == NULL) return;
 
     if (status&RT_MODE_ERGO) {
-        load = ergFile->wattsAt(load_msecs, displayWorkoutLap);
+        load = ergFile->wattsAt(load_msecs, curLap);
+
+        if(displayWorkoutLap != curLap)
+        {
+            // we are onto a new lap/interval, reset the override
+            manualOverride = false;
+        }
+        if(manualOverride == false)
+        {
+            displayLoad = load;
+        }
+        displayWorkoutLap = curLap;
 
         // we got to the end!
         if (load == -100) {
@@ -820,7 +834,18 @@ void TrainTool::loadUpdate()
             main->notifySetNow(load_msecs);
         }
     } else {
-        gradient = ergFile->gradientAt(displayWorkoutDistance*1000, displayWorkoutLap);
+        gradient = ergFile->gradientAt(displayWorkoutDistance*1000, curLap);
+
+        if(displayWorkoutLap != curLap)
+        {
+            // we are onto a new lap/interval, reset the override
+            manualOverride = false;
+        }
+        if(manualOverride == false)
+        {
+            displayGradient = gradient;
+        }
+        displayWorkoutLap = curLap;
 
         // we got to the end!
         if (gradient == -100) {
@@ -870,6 +895,8 @@ void TrainTool::Higher()
 {
     if (deviceController == NULL) return;
 
+    manualOverride = true;
+
     if (status&RT_MODE_ERGO) displayLoad += 5;
     else displayGradient += 0.1;
 
@@ -884,6 +911,8 @@ void TrainTool::Higher()
 void TrainTool::Lower()
 {
     if (deviceController == NULL) return;
+
+    manualOverride = true;
 
     if (status&RT_MODE_ERGO) displayLoad -= 5;
     else displayGradient -= 0.1;
