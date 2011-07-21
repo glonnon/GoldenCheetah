@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/ride">
+        <file>web/jquery-1.5.1.min.js</file>
+        <file>web/jquery.jqplot.min.js</file>
+        <file>web/ride.js</file>
+        <file>web/RideMap.html</file>
+        <file>web/RideWindow.html</file>
+        <file>web/Rider.js</file>
+    </qresource>
+</RCC>

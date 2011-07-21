@@ -635,6 +635,18 @@ void TrainTool::updateData(RealtimeData &rtData)
         return;
 }
 
+// called by the RideWindow to get the complete data for the RealtimeWindow
+// note: the device controller doesn't have all the data.
+void TrainTool::getRealtimeData(RealtimeData &rtData)
+{
+    rtData.setHr(this->displayHeartRate);
+    rtData.setCadence(this->displayCadence);
+    rtData.setLoad(this->displayLoad);
+    rtData.setSpeed(this->displaySpeed);
+    rtData.setMsecs(this->total_msecs);
+    rtData.setWatts(this->displayPower);
+}
+
 //----------------------------------------------------------------------
 // SCREEN UPDATE FUNCTIONS
 //----------------------------------------------------------------------

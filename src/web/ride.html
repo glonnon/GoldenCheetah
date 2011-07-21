@@ -1,0 +1,69 @@
+<html>
+  <head>
+    <meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-1'>
+    <title>Ride Window</title>
+
+    <style type="text/css" href="jquery.jqplot.css" />
+    <style type="text/css">
+      body {
+      margin: 0;
+      padding: 0;
+      }
+      #container {
+      margin: 1%;
+      padding: 0;
+      width: 97%;
+      height: 70%;
+      background-color: #fc9;
+      }
+      #map, #streetview {
+      float: left;
+      width: 46.5%;
+      height: 87%;
+      margin: 1% 0 1% 1%;
+      padding: 1%;
+      background-color: #9cf;
+      color: #000;
+      }
+      #streetview {
+      float: right;
+      margin: 1% 1% 1% 0;
+      }
+      #clear {
+      height: 0;
+      font-size: 1px;
+      margin: 0;
+      padding: 0;
+      line-height: 0;
+      clear: both;
+      }
+    </style>
+
+    <script type="text/javascript" src="rideride.js"></script>
+    <script type="text/javascript" src="jquery-1.5.1.min.js"></script>
+    <script type="text/javascript" src="jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&libraries=geometry"></script>
+    <script type="text/javascript" src="Rider.js"></script>
+    <script type="text/javascript" src="ride.js"></script>
+
+  </head>
+  <body>
+    <script>
+      $(function() {
+      $( "#tabs" ).tabs();
+      });
+    </script>
+
+    <div id="tabs">
+      <ul>
+        <li><a href="#staticmap">Static Map</a></li>
+        <li><a href="#ride">Ride Map</a></li>
+      </ul>
+      <div id="map"></div>
+      <div id="streetview"></div>
+    </div>
+    <div id="chart"></div>
+  </body>
+</html>
+
+

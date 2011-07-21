@@ -100,7 +100,10 @@ class TrainTool : public QWidget
         void newLap();                      // start new Lap!
         void nextDisplayMode();     // show next display mode
         void setDeviceController();     // based upon selected device
+        RealtimeController *getDeviceController() { return deviceController; }
         void setStreamController();     // based upon selected device
+        void getRealtimeData(RealtimeData &data); // update the telemetry data that is displayed
+
 
         // this
         QTabWidget  *trainTabs;

@@ -74,6 +74,7 @@ GcWindowRegistry GcWindows[] = {
     { "Realtime Dial",GcWindowTypes::DialWindow },
     { "Realtime Plot",GcWindowTypes::RealtimePlot },
     { "Workout Plot",GcWindowTypes::WorkoutPlot },
+    { "Ride Window", GcWindowTypes::RideWindow },
     { "", GcWindowTypes::None }};
 
 // instantiate a new window
@@ -117,6 +118,7 @@ GcWindowRegistry::newGcWindow(GcWinID id, MainWindow *main) //XXX mainWindow wil
     case GcWindowTypes::MetadataWindow: returning = new MetadataWindow(main); break;
     case GcWindowTypes::RealtimePlot: returning = new RealtimePlotWindow(main); break;
     case GcWindowTypes::WorkoutPlot: returning = new WorkoutPlotWindow(main); break;
+    case GcWindowTypes::RideWindow: returning = new RideWindow(main); break;
     default: return NULL; break;
     }
     if (returning) returning->setProperty("type", QVariant::fromValue<GcWinID>(id));
