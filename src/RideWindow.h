@@ -11,7 +11,7 @@
 #include "RideFile.h"
 
 /// The rider class holds all the information needed to display the rider
-/// on the web page
+/// on the web page, the properties are proxied to the javascript side of the page
 class Rider : public QObject
 {
     Q_OBJECT
@@ -89,28 +89,21 @@ public slots:
 
 };
 
-// The sample class
-class Sample : QObject
-{
-
-
-};
 
 class RealtimeRider: public Rider
 {
     Q_OBJECT
 
-    TrainTool *window;
     RideItem *ride;
     boost::shared_ptr<QTimer> timer;
     double totDistance;
     double totTime;
+    double weight;
 
-public:
-    virtual void Update()
+    public slots:
+    void updateTelemetry(RealtimeData data)
     {
-        RealtimeData data;
-        //window->getRealtimeData(data);
+        qDebug() << "updateTelemetry";
         time = data.getMsecs() / 1000; // we need sec resolution...
         hr = data.getHr();
         watts = data.getWatts();
@@ -118,6 +111,11 @@ public:
         cadence = data.getCadence();
         load = data.getLoad();
 
+    }
+
+public:
+    virtual void Update()
+    {
         // simple model...  just use speed...
         // a better model is to use a physical model... rolling resistance, frontal area, grade, headwind, temp, elevation, etc...
         //
@@ -138,33 +136,18 @@ public:
 
         }
     }
-    RealtimeRider(TrainTool *w,RideItem *r)
+    RealtimeRider(MainWindow *m, RideItem *r)
     {
         totDistance = 0;
         totTime = 0;
-        window = w;
+
         ride = r;
         timer = boost::shared_ptr<QTimer>(new QTimer());
         connect(&*timer,SIGNAL(timeout()),this,SLOT(Update()));
         timer->start(1000);
+        connect(m,SIGNAL(notifyTelemetryUpdate),this,SLOT(TelemetryUpdate));
     }
 };
-
-/// rides at a particular wattage
-class Pacer : public Rider
-{
-    Q_OBJECT
-
-public:
-    void setLoad(double l) { load = l;}
-
-    virtual void Update()
-    {
-        // use the load to figure out where the rider location
-
-    }
-};
-
 
 /// rides the rideFile exactly
 class GhostRider : public Rider
