@@ -32,6 +32,9 @@
 
 class NullController : public RealtimeController
 {
+ private:
+    TrainTool *parent;
+
  public:
 
   TrainTool *parent;
@@ -56,6 +59,41 @@ class NullController : public RealtimeController
 
  private:
     double load;
+};
+
+class TestController : public RealtimeController, QDialog
+{
+private:
+    TrainTool *parent;
+    bool push, pull, load;
+public:
+
+ // hostname and port are the hostname/port of the server to which
+ // this NullControlller should connect.
+ TestController(TrainTool *parent,
+                         DeviceConfiguration *dc)
+ {
+
+
+ }
+
+ ~TestController() { }
+
+ int start();
+ int stop();
+ int pause();
+ int restart();
+ bool discover(char *) {  return true;  }
+ bool doesPush() {  return false; }
+ bool doesPull() {  return true; }
+ bool doesLoad() {  return false; }
+ void setLoad(double watts) { load = watts; }
+ void getRealtimeData(RealtimeData &rtData);
+ void pushRealtimeData(RealtimeData &rtData);
+
+private:
+   double load;
+
 };
 
 

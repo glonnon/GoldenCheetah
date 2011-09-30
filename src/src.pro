@@ -158,10 +158,12 @@ SOURCES += ../qxt/src/qxtspanslider.cpp \
            ../qxt/src/qxtscheduleheaderwidget.cpp \
            ../qxt/src/qxtscheduleviewheadermodel_p.cpp \
            ../qxt/src/qxtscheduleitemdelegate.cpp \
-           ../qxt/src/qxtstyleoptionscheduleviewitem.cpp
+           ../qxt/src/qxtstyleoptionscheduleviewitem.cpp \
+    RealtimeRider.cpp
 
 include( ../qtsolutions/soap/qtsoap.pri )
-HEADERS += TPUpload.h TPUploadDialog.h TPDownload.h TPDownloadDialog.h
+HEADERS += TPUpload.h TPUploadDialog.h TPDownload.h TPDownloadDialog.h \
+    RealtimeRider.h
 SOURCES += TPUpload.cpp TPUploadDialog.cpp TPDownload.cpp TPDownloadDialog.cpp
 DEFINES += GC_HAVE_SOAP
 
@@ -522,4 +524,3 @@ OTHER_FILES += \
     web/MapWindow.html \
     web/StreetViewWindow.html \
     web/Window.css
-
