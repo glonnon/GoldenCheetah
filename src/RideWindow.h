@@ -30,7 +30,7 @@
 #include "RealtimeController.h"
 #include "RideFile.h"
 
-
+class RiderBridge;
 
 class RideWindow : public GcWindow
 {

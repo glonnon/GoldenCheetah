@@ -19,6 +19,7 @@
 #include "RideWindow.h"
 #include "RealtimeData.h"
 #include "JsonRideFile.h"
+#include "RealtimeRider.h"
 
 // this is called on every page load in the web browser
 void RideWindow::addJSObjects()

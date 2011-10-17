@@ -37,8 +37,6 @@ class NullController : public RealtimeController
 
  public:
 
-  TrainTool *parent;
-
   // hostname and port are the hostname/port of the server to which
   // this NullControlller should connect.
   NullController(TrainTool *parent,
@@ -70,8 +68,7 @@ public:
 
  // hostname and port are the hostname/port of the server to which
  // this NullControlller should connect.
- TestController(TrainTool *parent,
-                         DeviceConfiguration *dc)
+ TestController(TrainTool *parent,  DeviceConfiguration *dc) : RealtimeController(parent,dc)
  {
 
 
@@ -87,12 +84,12 @@ public:
  bool doesPush() {  return false; }
  bool doesPull() {  return true; }
  bool doesLoad() {  return false; }
- void setLoad(double watts) { load = watts; }
+ void setWatts(double watts) { curWatts = watts; }
  void getRealtimeData(RealtimeData &rtData);
  void pushRealtimeData(RealtimeData &rtData);
 
 private:
-   double load;
+   double curWatts;
 
 };
 
