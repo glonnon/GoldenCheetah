@@ -38,15 +38,15 @@ private:
     bool push, pull, load;
 public:
 
- // hostname and port are the hostname/port of the server to which
- // this NullControlller should connect.
- TestController(TrainTool *parent,  DeviceConfiguration *dc) : RealtimeController(parent,dc)
+ PacerChart(TrainTool *parent,  DeviceConfiguration *dc) : RealtimeController(parent,dc)
  {
 
 
  }
 
  ~TestController() { }
+
+
 
  int start();
  int stop();

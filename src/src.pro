@@ -159,11 +159,13 @@ SOURCES += ../qxt/src/qxtspanslider.cpp \
            ../qxt/src/qxtscheduleviewheadermodel_p.cpp \
            ../qxt/src/qxtscheduleitemdelegate.cpp \
            ../qxt/src/qxtstyleoptionscheduleviewitem.cpp \
-    RealtimeRider.cpp
+    RealtimeRider.cpp \
+    PacerChart.cpp
 
 include( ../qtsolutions/soap/qtsoap.pri )
 HEADERS += TPUpload.h TPUploadDialog.h TPDownload.h TPDownloadDialog.h \
-    RealtimeRider.h
+    RealtimeRider.h \
+    PacerChart.h
 SOURCES += TPUpload.cpp TPUploadDialog.cpp TPDownload.cpp TPDownloadDialog.cpp
 DEFINES += GC_HAVE_SOAP
 
